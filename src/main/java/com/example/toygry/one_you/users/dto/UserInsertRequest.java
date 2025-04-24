@@ -1,4 +1,4 @@
-package com.example.toygry.one_you.Users.dto;
+package com.example.toygry.one_you.users.dto;
 
 import lombok.Data;
 

@@ -1,9 +1,8 @@
-package com.example.toygry.one_you.Users.repository;
+package com.example.toygry.one_you.users.repository;
 
-import com.example.toygry.one_you.Users.dto.UserInsertRequest;
 import com.example.toygry.one_you.jooq.generated.tables.daos.UsersDao;
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
-import lombok.AllArgsConstructor;
+import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
