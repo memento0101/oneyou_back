@@ -47,4 +47,8 @@ public class UsersRepository {
                 .set(USERS.CREATED_AT, LocalDateTime.now())
                 .execute();
     }
+
+    public Users findById(UUID id) {
+        return usersDao.findById(id);
+    }
 }
