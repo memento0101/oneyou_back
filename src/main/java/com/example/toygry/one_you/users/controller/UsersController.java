@@ -1,8 +1,8 @@
-package com.example.toygry.one_you.Users.controller;
+package com.example.toygry.one_you.users.controller;
 
-import com.example.toygry.one_you.Users.dto.UserInsertRequest;
-import com.example.toygry.one_you.Users.service.UsersService;
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
+import com.example.toygry.one_you.users.dto.UserInsertRequest;
+import com.example.toygry.one_you.users.service.UsersService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

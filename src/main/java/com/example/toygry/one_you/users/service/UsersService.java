@@ -1,8 +1,8 @@
-package com.example.toygry.one_you.Users.service;
+package com.example.toygry.one_you.users.service;
 
-import com.example.toygry.one_you.Users.dto.UserInsertRequest;
-import com.example.toygry.one_you.Users.repository.UsersRepository;
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
+import com.example.toygry.one_you.users.dto.UserInsertRequest;
+import com.example.toygry.one_you.users.repository.UsersRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
