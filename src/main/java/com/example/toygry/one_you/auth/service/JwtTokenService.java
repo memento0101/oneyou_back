@@ -2,6 +2,8 @@ package com.example.toygry.one_you.auth.service;
 
 import com.example.toygry.one_you.auth.dto.LoginRequest;
 import com.example.toygry.one_you.auth.dto.TokenResponse;
+import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
+import com.example.toygry.one_you.users.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,11 +28,13 @@ public class JwtTokenService {
     private final AuthenticationManager authenticationManager;
     private final JwtEncoder jwtEncoder;
     private final String issuer;
+    private final UsersRepository usersRepository;
 
-    public JwtTokenService(AuthenticationManager authenticationManager, JwtEncoder jwtEncoder, @Value("${spring.application.name:one_you}") String issuer) {
+    public JwtTokenService(AuthenticationManager authenticationManager, JwtEncoder jwtEncoder, @Value("${spring.application.name:one_you}") String issuer, UsersRepository usersRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtEncoder = jwtEncoder;
         this.issuer = issuer;
+        this.usersRepository = usersRepository;
     }
 
     public TokenResponse generateToken(LoginRequest loginRequest) {
@@ -41,6 +45,9 @@ public class JwtTokenService {
                         loginRequest.getPassword()
                 )
         );
+
+        Users dbUser = usersRepository.findByUsername(loginRequest.getUsername());
+        String uuid = dbUser.getId().toString();
 
         // Get user authorities
         String authorities = authentication.getAuthorities().stream()
@@ -58,6 +65,7 @@ public class JwtTokenService {
                 .expiresAt(expiresAt)
                 .subject(authentication.getName())
                 .claim("scope", authorities)
+                .claim("uuid", uuid)
                 .build();
 
         // Generate token

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -26,5 +27,11 @@ public class UsersController {
     public ResponseEntity<Void> insertUser(@RequestBody UserInsertRequest request) {
         usersService.insertUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    // 유저 정보 한개 가져오기
+    @GetMapping("/{id}")
+    public ResponseEntity<Users> getUserByUsername(@PathVariable UUID id) {
+        return ResponseEntity.ok(usersService.getUserById(id));
     }
 }
