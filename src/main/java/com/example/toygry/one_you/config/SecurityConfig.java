@@ -1,5 +1,6 @@
 package com.example.toygry.one_you.config;
 
+import com.example.toygry.one_you.config.security.JwtAuthenticationFilter;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -33,12 +35,14 @@ public class SecurityConfig {
     private final RSAPublicKey publicKey;
     private final RSAPrivateKey privateKey;
     private final String keyId;
+//    private final JwtDecoder jwtDecoder;
 
     @Autowired
     public SecurityConfig(RSAPublicKey publicKey, RSAPrivateKey privateKey, String keyId) {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
         this.keyId = keyId;
+//        this.jwtDecoder = jwtDecoder;
     }
 
     @Bean
@@ -57,7 +61,8 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll() // H2 콘솔 접근 허용
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {})); // JWT 기반 OAuth2 리소스 서버 설정
+//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {})) // JWT 기반 OAuth2 리소스 서버 설정
+                .addFilterBefore(jwtAuthenticationFilter(jwtDecoder()), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -97,5 +102,10 @@ public class SecurityConfig {
 
         JWKSource<SecurityContext> jwkSource = new ImmutableJWKSet<>(new JWKSet(rsaKey));
         return new NimbusJwtEncoder(jwkSource);
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtDecoder jwtDecoder) {
+        return new JwtAuthenticationFilter(jwtDecoder);
     }
 }

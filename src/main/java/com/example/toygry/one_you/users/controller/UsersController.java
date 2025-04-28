@@ -1,15 +1,16 @@
 package com.example.toygry.one_you.users.controller;
 
+import com.example.toygry.one_you.config.security.UserTokenPrincipal;
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.service.UsersService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -30,8 +31,8 @@ public class UsersController {
     }
 
     // 유저 정보 한개 가져오기
-    @GetMapping("/{id}")
-    public ResponseEntity<Users> getUserByUsername(@PathVariable UUID id) {
-        return ResponseEntity.ok(usersService.getUserById(id));
+    @GetMapping("/info")
+    public ResponseEntity<Users> getUserInfo(@AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal) {
+        return ResponseEntity.ok(usersService.getUserById(userTokenPrincipal.getUuid()));
     }
 }
