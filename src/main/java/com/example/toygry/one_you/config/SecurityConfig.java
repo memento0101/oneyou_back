@@ -47,8 +47,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화 (POST 요청 허용 위해)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Configure headers for H2 console (using newer API)
-                .headers(headers -> 
-                    headers.contentSecurityPolicy(csp -> 
+                .headers(headers ->
+                    headers.contentSecurityPolicy(csp ->
                         csp.policyDirectives("frame-ancestors 'self'")
                     )
                 )
@@ -60,6 +60,8 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {})); // JWT 기반 OAuth2 리소스 서버 설정
         return http.build();
     }
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
