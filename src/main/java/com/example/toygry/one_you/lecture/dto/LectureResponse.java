@@ -1,12 +1,12 @@
 package com.example.toygry.one_you.lecture.dto;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
 @Builder
 public class LectureResponse {
     private UUID id;
