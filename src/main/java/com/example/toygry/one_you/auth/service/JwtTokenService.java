@@ -48,6 +48,7 @@ public class JwtTokenService {
 
         Users dbUser = usersRepository.findByUsername(loginRequest.getUsername());
         String uuid = dbUser.getId().toString();
+        String role = dbUser.getRole();
 
         // Get user authorities
         String authorities = authentication.getAuthorities().stream()
@@ -66,6 +67,7 @@ public class JwtTokenService {
                 .subject(authentication.getName())
                 .claim("scope", authorities)
                 .claim("uuid", uuid)
+                .claim("role", role)
                 .build();
 
         // Generate token

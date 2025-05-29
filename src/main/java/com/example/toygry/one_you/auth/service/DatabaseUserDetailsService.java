@@ -45,9 +45,9 @@ public class DatabaseUserDetailsService implements UserDetailsService {
 
         // Create a Spring Security User with the user's username, password, and role
         return User.builder()
-                .username(user.getUsername())
+                .username(user.getUserId())
                 .password(password)
-                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole())))
+//                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole())))
                 .build();
     }
 }

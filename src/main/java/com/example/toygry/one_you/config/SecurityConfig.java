@@ -54,7 +54,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/.well-known/jwks.json").permitAll() // 인증 관련 엔드포인트는 허용
-                        .requestMatchers("/h2-console/**").permitAll() // H2 콘솔 접근 허용
+
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {})); // JWT 기반 OAuth2 리소스 서버 설정

@@ -3,7 +3,6 @@ plugins {
     id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'nu.studer.jooq' version '9.0'
-    id 'org.flywaydb.flyway' version '10.20.1'
 }
 
 group = 'com.example.toygry'
@@ -32,15 +31,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     // Removed explicit Nimbus dependency as it's included in spring-boot-starter-oauth2-resource-server
 
-    implementation 'org.flywaydb:flyway-core'
 
     // jooq => 충돌 때문에 일부러 버전 넣었음
     implementation 'org.jooq:jooq:3.19.21'
     jooqGenerator 'org.jooq:jooq-codegen:3.19.21'
-    jooqGenerator 'com.h2database:h2'
+    jooqGenerator 'org.postgresql:postgresql'
 
     compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -56,50 +54,41 @@ jooq {
                 logging = org.jooq.meta.jaxb.Logging.WARN
 
                 jdbc {
-                    driver = 'org.h2.Driver'
-                    url = "jdbc:h2:file:${projectDir}/data/testdb;MODE=PostgreSQL;AUTO_SERVER=TRUE"
-                    user = 'sa'
-                    password = ''
+                    driver = 'org.postgresql.Driver'
+                    url = 'jdbc:postgresql://localhost:5432/one_you'
+                    user = 'test'
+                    password = 'test'
                 }
 
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
 
                     database {
-                        name = 'org.jooq.meta.h2.H2Database'
-                        inputSchema = 'PUBLIC'
-
-                        excludes = 'flyway_schema_history'
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = 'public'
                     }
 
-                    generate {
-                        deprecated = false
-                        records = true
-                        immutablePojos = true
-                        fluentSetters = true
-                        daos = true
-                    }
+                        generate {
+                            deprecated = false
+                            records = true
+                            immutablePojos = true
+                            fluentSetters = true
+                            daos = true
+                        }
 
-                    target {
-                        packageName = 'com.example.toygry.one_you.jooq.generated'
-                        directory = 'build/generated-sources/jooq'
-                    }
+                        target {
+                            packageName = 'com.example.toygry.one_you.jooq.generated'
+                            directory = 'build/generated-sources/jooq'
+                        }
 
-                    strategy {
-                        name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                        strategy {
+                            name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                        }
                     }
                 }
             }
         }
     }
-}
-
-flyway {
-    url = "jdbc:h2:file:${projectDir}/data/testdb;MODE=PostgreSQL"
-    user = "sa"
-    password = ""
-    locations = ["filesystem:src/main/resources/db/migration"]
-}
 
 
 tasks.named('test') {
