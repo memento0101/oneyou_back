@@ -18,13 +18,14 @@ public record UserResponse(
         String majorType,
         EjuScores ejuScores,
         String note,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        String role
 ) {
     public record GoalUniversity(String school, String major) {}
     public record EjuScores(
             Integer listening,
             Integer reading,
-            @JsonProperty("total_listen_read")
             Integer totalListenRead,
             Integer science,
             String subject1,

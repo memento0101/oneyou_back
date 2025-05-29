@@ -64,7 +64,7 @@ public class AuthController {
     // 회원가입 (학생 등록) => 선생님 등록은 별도로 추가 필요
     @PostMapping("/register")
     public ResponseEntity<Void> insertStudent(@RequestBody UserInsertRequest request) {
-        usersService.insertUser(request);
+        usersService.insertStudent(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

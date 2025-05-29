@@ -28,7 +28,6 @@ public class UsersRepository {
 
     // Dao 로 쓰는 방식 => JPA 감성
     public List<Users> findAllUsers() {
-//        return usersDao.findAll();
         return dsl.selectFrom(USERS).fetchInto(Users.class);
     }
 
@@ -39,7 +38,7 @@ public class UsersRepository {
                 .fetchOneInto(Users.class);
     }
 
-    public void insertUser(UserInsertRequest request) {
+    public void insertStudent(UserInsertRequest request) {
         String goalJson = toJson(request.goalUniversities());
         String ejuJson = toJson(request.ejuScores());
 
@@ -58,7 +57,7 @@ public class UsersRepository {
                 .set(USERS.NOTE, request.note())
                 .set(USERS.CREATED_AT, LocalDateTime.now())
                 .set(USERS.UPDATED_AT, LocalDateTime.now())
-                .set(USERS.ROLE,"student")
+                .set(USERS.ROLE,"STUDENT")
                 .execute();
     }
 

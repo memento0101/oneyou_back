@@ -50,15 +50,17 @@ public class UsersService {
                     user.getMajorType(),
                     eju,
                     user.getNote(),
-                    user.getCreatedAt()
+                    user.getCreatedAt(),
+                    user.getUpdatedAt(),
+                    user.getRole()
             );
         } catch (Exception e) {
             throw new RuntimeException("JSON 파싱 에러", e);
         }
     }
 
-    public void insertUser(UserInsertRequest request) {
-        usersRepository.insertUser(request);
+    public void insertStudent(UserInsertRequest request) {
+        usersRepository.insertStudent(request);
     }
 
 //    public Users getUserById(UUID id) {
