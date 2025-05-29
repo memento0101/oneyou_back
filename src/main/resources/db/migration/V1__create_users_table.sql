@@ -51,3 +51,7 @@ INSERT INTO users (
              }',
              '조용한 환경에서 공부하고 싶습니다.'
          );
+
+
+ALTER TABLE users
+    ADD COLUMN role VARCHAR(50) DEFAULT 'STUDENT';

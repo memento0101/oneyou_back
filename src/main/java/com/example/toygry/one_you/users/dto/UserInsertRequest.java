@@ -1,14 +1,21 @@
 package com.example.toygry.one_you.users.dto;
 
-import lombok.Data;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
-@Data
-public class UserInsertRequest {
-    private String username;
-    private String password;
-    private String role;
-    private String name;
-    private String email;
-    private String sPhoneNumber;
-    private String pPhoneNumber;
-}
+public record UserInsertRequest(
+        String userId,
+        String password,
+        String name,
+        String studentContact,
+        String parentContact,
+        String address,
+        List<Map<String, String>> goalUniversities,
+        Integer studyYears,
+        String majorType,
+        Map<String, Object> ejuScores,
+        String note,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+) {}
