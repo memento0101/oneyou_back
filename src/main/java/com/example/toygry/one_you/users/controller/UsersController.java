@@ -1,20 +1,16 @@
 package com.example.toygry.one_you.users.controller;
 
-import com.example.toygry.one_you.config.security.UserTokenPrincipal;
-import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
-import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.dto.UserResponse;
 import com.example.toygry.one_you.users.service.UsersService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 @AllArgsConstructor
 public class UsersController {
 
