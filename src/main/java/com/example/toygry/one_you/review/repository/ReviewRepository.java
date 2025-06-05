@@ -34,16 +34,7 @@ public class ReviewRepository {
                 .join(LECTURE).on(REVIEW.LECTURE_ID.eq(LECTURE.ID))
                 .join(USERS).on(REVIEW.USER_ID.eq(USERS.ID))
                 .fetch()
-                .map(record -> new ReviewResponse(
-                        record.get(REVIEW.ID),
-                        record.get(REVIEW.LECTURE_ID),
-                        record.get("lectureTitle",String.class),
-                        record.get("userName",String.class),
-                        record.get(REVIEW.CONTENTS),
-                        record.get(REVIEW.SCORE),
-                        record.get(REVIEW.CREATED_AT),
-                        record.get(REVIEW.UPDATED_AT)
-                ));
+                .map(ReviewResponse::fromRecord);
 
     }
     public List<ReviewResponse> findByLectureId(UUID lectureId) {
@@ -62,16 +53,7 @@ public class ReviewRepository {
                 .join(USERS).on(REVIEW.USER_ID.eq(USERS.ID))
                 .where(REVIEW.LECTURE_ID.eq(lectureId))
                 .fetch()
-                .map(record -> new ReviewResponse(
-                        record.get(REVIEW.ID),
-                        record.get(REVIEW.LECTURE_ID),
-                        record.get("lectureTitle", String.class),
-                        record.get("userName", String.class),
-                        record.get(REVIEW.CONTENTS),
-                        record.get(REVIEW.SCORE),
-                        record.get(REVIEW.CREATED_AT),
-                        record.get(REVIEW.UPDATED_AT)
-                ));
+                .map(ReviewResponse::fromRecord);
     }
 
 }
