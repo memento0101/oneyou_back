@@ -6,8 +6,7 @@ import com.example.toygry.one_you.review.dto.ReviewRequest;
 import com.example.toygry.one_you.review.dto.ReviewResponse;
 import com.example.toygry.one_you.review.service.ReviewService;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/review")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
@@ -35,6 +34,9 @@ public class ReviewController {
 
     // 자기가 작성한 수강평 목록 조회
 //    @GetMapping("users")
+//    public ApiResponse<List<ReviewResponse>> getUsersReviews(@AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal) {
+//        return ApiResponse.success(reviewService.getUsersReviews(userTokenPrincipal));
+//    }
 
     // 수강평 작성
     @PostMapping
@@ -49,8 +51,8 @@ public class ReviewController {
     // 수강평 수정
     @PutMapping("/{reviewId}")
     public ApiResponse<String> updateReview(
-            @PathVariable UUID reviewId,
             @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal,
+            @PathVariable UUID reviewId,
             @RequestBody ReviewRequest request) {
         reviewService.updateReview(reviewId, userTokenPrincipal, request);
         return ApiResponse.success("수정이 완료 되었습니다.");
@@ -59,12 +61,12 @@ public class ReviewController {
     // 수강평 삭제
     @DeleteMapping("/{reviewId}")
     public ApiResponse<String> deleteReview(
-            @PathVariable UUID reviewId,
-            @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal) {
+            @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal,
+            @PathVariable UUID reviewId
+            ) {
         reviewService.deleteReview(reviewId, userTokenPrincipal);
         return ApiResponse.success("삭제가 완료 되었습니다.");
     }
-
 
     //    @GetMapping("/user")
 //    public ResponseEntity<List<UserLectureResponse>> getUserLectures(@AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal) {
