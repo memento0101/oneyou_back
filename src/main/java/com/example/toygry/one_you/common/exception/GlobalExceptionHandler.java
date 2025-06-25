@@ -1,5 +1,6 @@
 package com.example.toygry.one_you.common.exception;
 
+import com.example.toygry.one_you.common.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -8,16 +9,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
-    public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
+    public ResponseEntity<ApiResponse<?>> handleBaseException(BaseException ex) {
+
         return ResponseEntity
                 .status(ex.getStatusCode().getHttpStatus())
-                .body(new ErrorResponse(
-                        ex.getStatusCode().name(),
-                        ex.getStatusCode().getMessage()
-                ));
+                .body(ApiResponse.fail(ex.getStatusCode().getHttpStatus(), ex.getMessage()));
     }
-
-    // 예외 응답 객체
-    record ErrorResponse(String code, String message) {}
-
 }
