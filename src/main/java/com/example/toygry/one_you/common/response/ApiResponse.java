@@ -1,10 +1,11 @@
 package com.example.toygry.one_you.common.response;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
     private final boolean success;
     private final String message;
