@@ -9,17 +9,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
-    public ResponseEntity<ApiResponse<ErrorResponse>> handleBaseException(BaseException ex) {
-        ErrorResponse error = new ErrorResponse(
-                ex.getStatusCode().name(),
-                ex.getStatusCode().getMessage()
-        );
+    public ResponseEntity<ApiResponse<?>> handleBaseException(BaseException ex) {
 
         return ResponseEntity
                 .status(ex.getStatusCode().getHttpStatus())
-                .body(ApiResponse.fail(error));
+                .body(ApiResponse.fail(ex.getStatusCode().getHttpStatus(), ex.getMessage()));
     }
-
-    // 예외 응답 객체
-    public record ErrorResponse(String code, String message) {}
 }
