@@ -3,6 +3,7 @@ package com.example.toygry.one_you.users.repository;
 import com.example.toygry.one_you.jooq.generated.tables.daos.UsersDao;
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
+import com.example.toygry.one_you.users.dto.UserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,23 @@ public class UsersRepository {
                 .set(USERS.UPDATED_AT, LocalDateTime.now())
                 .set(USERS.ROLE,"STUDENT")
                 .execute();
+    }
+
+    public List<UserResponse.GoalUniversity> findGoalUniversities(UUID userId) {
+        String goalJson = dsl.select(USERS.GOAL_UNIVERSITIES)
+                .from(USERS)
+                .where(USERS.ID.eq(userId))
+                .fetchOneInto(String.class);
+
+        if (goalJson == null || goalJson.isEmpty()) {
+            return List.of();
+        }
+
+        try {
+            return List.of(objectMapper.readValue(goalJson, UserResponse.GoalUniversity[].class));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("목표 대학 파싱 실패", e);
+        }
     }
 
     private String toJson(Object obj) {
