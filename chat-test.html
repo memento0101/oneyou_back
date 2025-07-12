@@ -2,17 +2,19 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>강의 채팅 테스트 (아이디, 이름 입력)</title>
+    <title>강의 채팅 테스트 (중복 방지 포함)</title>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
     <style>
         body { font-family: Arial; padding: 20px; }
         #chat, #users { border: 1px solid #ccc; height: 200px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
         #message { width: 80%; }
+        .connected { background-color: #4CAF50; color: white; }
+        .disconnected { background-color: #f44336; color: white; }
     </style>
 </head>
 <body>
-<h2>강의 채팅 테스트</h2>
+<h2>강의 채팅 테스트 (중복 방지 포함)</h2>
 
 <label>강의 ID (roomId): <input type="text" id="roomId" value="lecture-123"></label><br>
 <label>유저 ID (userId): <input type="text" id="userId" value="user1"></label><br>
@@ -23,7 +25,7 @@
 
 <input type="text" id="message" placeholder="메시지 입력">
 <button onclick="sendMessage()">보내기</button>
-<button onclick="connect()">연결</button>
+<button id="connectBtn" class="disconnected" onclick="connect()">연결</button>
 <button onclick="disconnect()">연결 끊기</button>
 
 <br><br>
@@ -38,6 +40,11 @@
     let userListInterval = null;
 
     function connect() {
+        if (stompClient && stompClient.connected) {
+            appendMessage('⚠ 이미 연결되어 있습니다.');
+            return;
+        }
+
         roomId = document.getElementById('roomId').value.trim();
         userId = document.getElementById('userId').value.trim();
         userName = document.getElementById('userName').value.trim();
@@ -47,6 +54,8 @@
 
         stompClient.connect({}, function () {
             appendMessage('✅ 서버 연결됨');
+            document.getElementById('connectBtn').classList.remove('disconnected');
+            document.getElementById('connectBtn').classList.add('connected');
 
             stompClient.subscribe('/topic/' + roomId, function (message) {
                 const chat = JSON.parse(message.body);
@@ -59,13 +68,17 @@
                 userName: userName
             }));
 
-            userListInterval = setInterval(fetchUserList, 3000);
+            if (!userListInterval) {
+                userListInterval = setInterval(fetchUserList, 3000);
+            }
+        }, function (error) {
+            appendMessage('❌ 연결 실패: ' + error);
         });
     }
 
     function sendMessage() {
         const messageContent = document.getElementById('message').value.trim();
-        if (messageContent && stompClient) {
+        if (messageContent && stompClient && stompClient.connected) {
             stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
                 roomId: roomId,
                 userId: userId,
@@ -77,7 +90,7 @@
     }
 
     function disconnect() {
-        if (stompClient) {
+        if (stompClient && stompClient.connected) {
             stompClient.send("/app/chat.leaveUser", {}, JSON.stringify({
                 roomId: roomId,
                 userId: userId,
@@ -86,17 +99,23 @@
             stompClient.disconnect(() => {
                 appendMessage('❌ 서버 연결 종료됨');
                 clearInterval(userListInterval);
+                userListInterval = null;
                 document.getElementById('users').innerHTML = '';
+                stompClient = null;
+                document.getElementById('connectBtn').classList.remove('connected');
+                document.getElementById('connectBtn').classList.add('disconnected');
             });
         }
     }
 
     function fetchUserList() {
-        fetch('/api/chat/users/' + roomId)
+        fetch('http://localhost:8080/api/chat/users/' + roomId)
             .then(response => response.json())
             .then(users => {
                 document.getElementById('users').innerHTML = Array.from(users).join('<br>');
-            });
+            }).catch(err => {
+            console.error('유저 목록 불러오기 실패:', err);
+        });
     }
 
     function appendMessage(message) {
