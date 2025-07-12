@@ -24,6 +24,7 @@ public class UsersController {
         return usersService.getAllUsers();
     }
 
+    // 수강생 목표 3 지망 까지 출력
     @GetMapping("/goal")
     public ApiResponse<List<UserResponse.GoalUniversity>> getUserGoal(
             @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal

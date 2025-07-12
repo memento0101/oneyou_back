@@ -8,7 +8,6 @@ import com.example.toygry.one_you.lecture.dto.LectureDetailResponse;
 import com.example.toygry.one_you.lecture.dto.TeacherLectureGroupResponse;
 import com.example.toygry.one_you.lecture.service.LectureService;
 import com.example.toygry.one_you.lecture.service.StudentLectureService;
-import com.example.toygry.one_you.passReview.dto.PassReviewRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +31,7 @@ public class LectureController {
         return ApiResponse.success(studentLectureService.getActiveLecturesByUser(userPrincipal.getUuid()));
     }
 
+    // 강의 목차 출력 + 현재 진행도, 남은 수강 일수도 출력
     @GetMapping("/{lectureId}")
     public ApiResponse<LectureDetailResponse> getLectureDetail(
             @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal,
@@ -40,6 +40,7 @@ public class LectureController {
         return ApiResponse.success(lectureService.getLectureDetail(userTokenPrincipal.getUuid(), lectureId));
     }
 
+    // 강의 목차 클릭시 상세 출력
     @GetMapping("/detail")
     public ApiResponse<LectureContentsResponse> getLectureContentsDetail(
             @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal,
@@ -47,6 +48,8 @@ public class LectureController {
     ) {
         return ApiResponse.success(lectureService.getLectureContentsDetail(userTokenPrincipal.getUuid(), lectureDetailRequest));
     }
+
+    // 출석 체크
 
 
 
