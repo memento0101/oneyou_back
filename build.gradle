@@ -37,6 +37,12 @@ dependencies {
     jooqGenerator 'org.jooq:jooq-codegen:3.19.21'
     jooqGenerator 'org.postgresql:postgresql'
 
+    // websocket 관련 설정
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'org.webjars:sockjs-client:1.5.1'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'

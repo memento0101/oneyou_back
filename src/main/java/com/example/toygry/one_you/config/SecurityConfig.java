@@ -53,7 +53,7 @@ public class SecurityConfig {
                     )
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/.well-known/jwks.json").permitAll() // 인증 관련 엔드포인트는 허용
+                        .requestMatchers("/api/auth/**", "/.well-known/jwks.json", "/ws-chat/**", "/api/chat/**").permitAll() // 인증 관련 엔드포인트는 허용 TODO 채팅쪽 제거 필요
 
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )

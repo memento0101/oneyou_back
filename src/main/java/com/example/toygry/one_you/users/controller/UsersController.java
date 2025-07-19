@@ -1,8 +1,11 @@
 package com.example.toygry.one_you.users.controller;
 
+import com.example.toygry.one_you.common.response.ApiResponse;
+import com.example.toygry.one_you.config.security.UserTokenPrincipal;
 import com.example.toygry.one_you.users.dto.UserResponse;
 import com.example.toygry.one_you.users.service.UsersService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +22,14 @@ public class UsersController {
     @GetMapping
     public List<UserResponse> getAllUsers() { // 이거 Pojo 인데 구분이 좀 어려워서 변경 필요
         return usersService.getAllUsers();
+    }
+
+    // 수강생 목표 3 지망 까지 출력
+    @GetMapping("/goal")
+    public ApiResponse<List<UserResponse.GoalUniversity>> getUserGoal(
+            @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal
+    ) {
+        return ApiResponse.success(usersService.getUserGoal(userTokenPrincipal.getUuid()));
     }
 
 //

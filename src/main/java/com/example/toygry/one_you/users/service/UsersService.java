@@ -29,6 +29,10 @@ public class UsersService {
                 .toList();
     }
 
+    public List<UserResponse.GoalUniversity> getUserGoal(UUID userId) {
+        return usersRepository.findGoalUniversities(userId);
+    }
+
     private UserResponse toRecord(Users user) {
         try {
             var goals = objectmapper.readValue(
