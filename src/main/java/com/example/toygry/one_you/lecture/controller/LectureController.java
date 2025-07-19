@@ -41,7 +41,7 @@ public class LectureController {
     }
 
     // 강의 목차 클릭시 상세 출력
-    @GetMapping("/detail")
+    @PostMapping("/detail")
     public ApiResponse<LectureContentsResponse> getLectureContentsDetail(
             @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal,
             @RequestBody LectureDetailRequest lectureDetailRequest
