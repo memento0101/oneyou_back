@@ -31,6 +31,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     // Removed explicit Nimbus dependency as it's included in spring-boot-starter-oauth2-resource-server
 
+    // SpringDoc OpenAPI for Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
     // jooq => 충돌 때문에 일부러 버전 넣었음
     implementation 'org.jooq:jooq:3.19.21'

@@ -91,5 +91,87 @@ public class LectureRepository {
                 .fetchInto(LectureQuizOptionRecord.class);
     }
 
+    public void insertOrUpdateStudentReviewSubmission(UUID userId, UUID lectureDetailId, String reviewUrl) {
+        // 기존 제출 내역이 있는지 확인
+        StudentReviewSubmissionRecord existing = dsl.selectFrom(STUDENT_REVIEW_SUBMISSION)
+                .where(STUDENT_REVIEW_SUBMISSION.USER_ID.eq(userId)
+                        .and(STUDENT_REVIEW_SUBMISSION.LECTURE_DETAIL_ID.eq(lectureDetailId)))
+                .fetchOne();
 
+        if (existing != null) {
+            // 업데이트
+            dsl.update(STUDENT_REVIEW_SUBMISSION)
+                    .set(STUDENT_REVIEW_SUBMISSION.REVIEW_URL, reviewUrl)
+                    .set(STUDENT_REVIEW_SUBMISSION.UPDATED_AT, java.time.LocalDateTime.now())
+                    .where(STUDENT_REVIEW_SUBMISSION.USER_ID.eq(userId)
+                            .and(STUDENT_REVIEW_SUBMISSION.LECTURE_DETAIL_ID.eq(lectureDetailId)))
+                    .execute();
+        } else {
+            // 새로 삽입
+            dsl.insertInto(STUDENT_REVIEW_SUBMISSION)
+                    .set(STUDENT_REVIEW_SUBMISSION.ID, UUID.randomUUID())
+                    .set(STUDENT_REVIEW_SUBMISSION.USER_ID, userId)
+                    .set(STUDENT_REVIEW_SUBMISSION.LECTURE_DETAIL_ID, lectureDetailId)
+                    .set(STUDENT_REVIEW_SUBMISSION.REVIEW_URL, reviewUrl)
+                    .set(STUDENT_REVIEW_SUBMISSION.CREATED_AT, java.time.LocalDateTime.now())
+                    .set(STUDENT_REVIEW_SUBMISSION.UPDATED_AT, java.time.LocalDateTime.now())
+                    .execute();
+        }
+    }
+
+    // 특정 퀴즈 옵션이 정답인지 확인
+    public boolean isCorrectOption(UUID optionId) {
+        return dsl.select(LECTURE_QUIZ_OPTION.IS_CORRECT)
+                .from(LECTURE_QUIZ_OPTION)
+                .where(LECTURE_QUIZ_OPTION.ID.eq(optionId))
+                .fetchOne(LECTURE_QUIZ_OPTION.IS_CORRECT, Boolean.class);
+    }
+
+    // 퀴즈의 정답 옵션 조회
+    public LectureQuizOptionRecord fetchCorrectOption(UUID quizId) {
+        return dsl.selectFrom(LECTURE_QUIZ_OPTION)
+                .where(LECTURE_QUIZ_OPTION.LECTURE_QUIZ_ID.eq(quizId)
+                        .and(LECTURE_QUIZ_OPTION.IS_CORRECT.eq(true)))
+                .fetchOneInto(LectureQuizOptionRecord.class);
+    }
+
+    // 선택한 옵션 정보 조회
+    public LectureQuizOptionRecord fetchQuizOption(UUID optionId) {
+        return dsl.selectFrom(LECTURE_QUIZ_OPTION)
+                .where(LECTURE_QUIZ_OPTION.ID.eq(optionId))
+                .fetchOneInto(LectureQuizOptionRecord.class);
+    }
+
+    // 학생 강의 진도 업데이트 (upsert)
+    public void insertOrUpdateLectureProgress(UUID userId, UUID lectureDetailId, boolean isCompleted) {
+        // 기존 진도 기록이 있는지 확인
+        StudentLectureProgressRecord existing = dsl.selectFrom(STUDENT_LECTURE_PROGRESS)
+                .where(STUDENT_LECTURE_PROGRESS.USER_ID.eq(userId)
+                        .and(STUDENT_LECTURE_PROGRESS.LECTURE_DETAIL_ID.eq(lectureDetailId)))
+                .fetchOne();
+
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+        if (existing != null) {
+            // 업데이트
+            dsl.update(STUDENT_LECTURE_PROGRESS)
+                    .set(STUDENT_LECTURE_PROGRESS.IS_COMPLETED, isCompleted)
+                    .set(STUDENT_LECTURE_PROGRESS.COMPLETED_AT, isCompleted ? now : null)
+                    .set(STUDENT_LECTURE_PROGRESS.UPDATED_AT, now)
+                    .where(STUDENT_LECTURE_PROGRESS.USER_ID.eq(userId)
+                            .and(STUDENT_LECTURE_PROGRESS.LECTURE_DETAIL_ID.eq(lectureDetailId)))
+                    .execute();
+        } else {
+            // 새로 삽입
+            dsl.insertInto(STUDENT_LECTURE_PROGRESS)
+                    .set(STUDENT_LECTURE_PROGRESS.ID, UUID.randomUUID())
+                    .set(STUDENT_LECTURE_PROGRESS.USER_ID, userId)
+                    .set(STUDENT_LECTURE_PROGRESS.LECTURE_DETAIL_ID, lectureDetailId)
+                    .set(STUDENT_LECTURE_PROGRESS.IS_COMPLETED, isCompleted)
+                    .set(STUDENT_LECTURE_PROGRESS.COMPLETED_AT, isCompleted ? now : null)
+                    .set(STUDENT_LECTURE_PROGRESS.CREATED_AT, now)
+                    .set(STUDENT_LECTURE_PROGRESS.UPDATED_AT, now)
+                    .execute();
+        }
+    }
 }
