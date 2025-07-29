@@ -25,7 +25,7 @@ INSERT INTO users (
     id, user_id, password, name, student_contact, parent_contact, address,
     goal_universities, study_years, major_type, eju_scores, note
 ) VALUES (
-             gen_random_uuid(),
+             5d726309-0785-47e2-8f81-257d74401543,
              'student01@example.com',
              '$2a$10$examplehashedpassword',  -- BCrypt 암호 예시
              '홍길동',

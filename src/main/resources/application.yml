@@ -19,3 +19,10 @@ jwt:
     converter:
       resource-id: one_you-api
       principal-attribute: preferred_username
+
+# Swagger Configuration
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
