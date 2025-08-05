@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.example.toygry.one_you.jooq.generated.Tables.*;
+import static com.example.toygry.one_you.jooq.generated.Tables.NOTICE;
+import static com.example.toygry.one_you.jooq.generated.Tables.USERS;
 
 @Repository
 @RequiredArgsConstructor

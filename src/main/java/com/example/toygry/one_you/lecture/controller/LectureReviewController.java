@@ -2,7 +2,10 @@ package com.example.toygry.one_you.lecture.controller;
 
 import com.example.toygry.one_you.common.response.ApiResponse;
 import com.example.toygry.one_you.config.security.UserTokenPrincipal;
-import com.example.toygry.one_you.lecture.dto.*;
+import com.example.toygry.one_you.lecture.dto.LectureReviewListResponse;
+import com.example.toygry.one_you.lecture.dto.LectureReviewRequest;
+import com.example.toygry.one_you.lecture.dto.LectureReviewResponse;
+import com.example.toygry.one_you.lecture.dto.LectureReviewUpdateRequest;
 import com.example.toygry.one_you.lecture.service.LectureReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

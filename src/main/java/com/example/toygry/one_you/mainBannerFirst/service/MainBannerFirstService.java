@@ -24,7 +24,7 @@ public class MainBannerFirstService {
 
     public void deleteBanner(UUID id) {
         if (id == null) {
-            throw new BaseException(OneYouStatusCode.BadRequest, "Id 를 확인해주세요");
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST, "Id 를 확인해주세요");
         }
         mainBannerFirstRepository.deleteBanner(id);
     }
@@ -33,7 +33,7 @@ public class MainBannerFirstService {
         Boolean current = mainBannerFirstRepository.getCurrentActiveStatus(id);
 
         if (current == null) {
-            throw new BaseException(OneYouStatusCode.BadRequest, "배너를 찾을 수 없습니다.");
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST, "배너를 찾을 수 없습니다.");
         }
 
         if (!current) {

@@ -1,6 +1,5 @@
 package com.example.toygry.one_you.users.repository;
 
-import com.example.toygry.one_you.jooq.generated.tables.daos.UsersDao;
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.dto.UserResponse;
