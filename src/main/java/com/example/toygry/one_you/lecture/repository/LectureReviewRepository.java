@@ -1,7 +1,6 @@
 package com.example.toygry.one_you.lecture.repository;
 
 import com.example.toygry.one_you.jooq.generated.tables.records.LectureReviewRecord;
-import com.example.toygry.one_you.jooq.generated.tables.records.UsersRecord;
 import com.example.toygry.one_you.lecture.dto.LectureReviewListResponse.RatingStatistics;
 import com.example.toygry.one_you.lecture.dto.LectureReviewResponse;
 import lombok.RequiredArgsConstructor;

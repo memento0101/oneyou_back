@@ -23,7 +23,7 @@ public class LectureService {
     public LectureDetailResponse getLectureDetail(UUID userId, UUID lectureId) {
         LocalDateTime expireDate = studentLectureRepository.findLectureExpireDate(userId, lectureId);
         if (expireDate == null || expireDate.isBefore(LocalDateTime.now())) {
-            throw new BaseException(OneYouStatusCode.LectureForbidden, "수강 가능한 강의가 아닙니다.");
+            throw new BaseException(OneYouStatusCode.LECTURE_FORBIDDEN);
         }
 
         int total = lectureRepository.countTotalLectureDetails(lectureId);
@@ -54,13 +54,13 @@ public class LectureService {
 
         LectureDetailRecord detail = lectureRepository.findLectureDetail(request.lectureDetailId());
         if (detail == null) {
-            throw new BaseException(OneYouStatusCode.LectureNotFound, "해당 강의를 찾을 수 없습니다.");
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND);
         }
 
         if ("QUIZ".equalsIgnoreCase(request.type())) {
             List<LectureQuizRecord> quizList = lectureRepository.fetchLectureQuizzes(request.lectureDetailId());
             if (quizList.isEmpty()) {
-                throw new BaseException(OneYouStatusCode.LectureNotFound, "등록된 퀴즈가 없습니다.");
+                throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "등록된 퀴즈가 없습니다.");
             }
 
             // 각 퀴즈의 옵션도 함께 조회
@@ -73,7 +73,7 @@ public class LectureService {
         }
         LectureContentRecord content = lectureRepository.fetchLectureContent(request.lectureDetailId());
         if (content == null) {
-            throw new BaseException(OneYouStatusCode.LectureNotFound, "강의 내용이 없습니다.");
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "강의 내용이 없습니다.");
         }
 
         if ("VIDEO".equalsIgnoreCase(request.type())) {
@@ -87,7 +87,7 @@ public class LectureService {
             return LectureContentsResponse.ofLive(detail, content);
         }
 
-        throw new BaseException(OneYouStatusCode.BadRequest, "알 수 없는 강의 유형입니다.");
+        throw new BaseException(OneYouStatusCode.BAD_REQUEST, "알 수 없는 강의 유형입니다.");
 
     }
 
@@ -95,7 +95,7 @@ public class LectureService {
         // 강의 상세 정보가 존재하는지 확인
         LectureDetailRecord lectureDetail = lectureRepository.findLectureDetail(request.lectureDetailId());
         if (lectureDetail == null) {
-            throw new BaseException(OneYouStatusCode.LectureNotFound, "해당 강의를 찾을 수 없습니다.");
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "해당 강의를 찾을 수 없습니다.");
         }
 
         // 학생 리뷰 제출 정보 저장 또는 업데이트
@@ -107,13 +107,13 @@ public class LectureService {
         // 강의 상세 정보가 존재하는지 확인
         LectureDetailRecord lectureDetail = lectureRepository.findLectureDetail(request.lectureDetailId());
         if (lectureDetail == null) {
-            throw new BaseException(OneYouStatusCode.LectureNotFound, "해당 강의를 찾을 수 없습니다.");
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "해당 강의를 찾을 수 없습니다.");
         }
 
         // 해당 강의의 모든 퀴즈 조회
         List<LectureQuizRecord> quizzes = lectureRepository.fetchLectureQuizzes(request.lectureDetailId());
         if (quizzes.isEmpty()) {
-            throw new BaseException(OneYouStatusCode.LectureNotFound, "등록된 퀴즈가 없습니다.");
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "등록된 퀴즈가 없습니다.");
         }
 
         List<QuizGradingResponse.QuizResult> results = new ArrayList<>();
@@ -125,18 +125,18 @@ public class LectureService {
             LectureQuizRecord quiz = quizzes.stream()
                     .filter(q -> q.getId().equals(answer.quizId()))
                     .findFirst()
-                    .orElseThrow(() -> new BaseException(OneYouStatusCode.BadRequest, "존재하지 않는 퀴즈입니다."));
+                    .orElseThrow(() -> new BaseException(OneYouStatusCode.BAD_REQUEST, "존재하지 않는 퀴즈입니다."));
 
             // 선택한 옵션 정보 조회
             LectureQuizOptionRecord selectedOption = lectureRepository.fetchQuizOption(answer.selectedOptionId());
             if (selectedOption == null) {
-                throw new BaseException(OneYouStatusCode.BadRequest, "존재하지 않는 옵션입니다.");
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST, "존재하지 않는 옵션입니다.");
             }
 
             // 정답 옵션 조회
             LectureQuizOptionRecord correctOption = lectureRepository.fetchCorrectOption(answer.quizId());
             if (correctOption == null) {
-                throw new BaseException(OneYouStatusCode.BadRequest, "정답이 설정되지 않은 퀴즈입니다.");
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST, "정답이 설정되지 않은 퀴즈입니다.");
             }
 
             // 정답 여부 확인
@@ -179,7 +179,7 @@ public class LectureService {
         // 강의 상세 정보가 존재하는지 확인
         LectureDetailRecord lectureDetail = lectureRepository.findLectureDetail(request.lectureDetailId());
         if (lectureDetail == null) {
-            throw new BaseException(OneYouStatusCode.LectureNotFound, "해당 강의를 찾을 수 없습니다.");
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "해당 강의를 찾을 수 없습니다.");
         }
 
         // 학생 강의 진도 업데이트

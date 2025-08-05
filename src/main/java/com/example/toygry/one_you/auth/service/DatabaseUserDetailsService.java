@@ -2,15 +2,12 @@ package com.example.toygry.one_you.auth.service;
 
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
 import com.example.toygry.one_you.users.repository.UsersRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
 
 /**
  * Custom UserDetailsService implementation that uses the database

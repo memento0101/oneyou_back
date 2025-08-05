@@ -1,7 +1,5 @@
 package com.example.toygry.one_you.users.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;

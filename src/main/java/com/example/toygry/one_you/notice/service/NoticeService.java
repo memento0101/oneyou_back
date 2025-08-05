@@ -63,7 +63,7 @@ public class NoticeService {
 
         // 작성자가 본인인지 확인 (관리자 권한 체크는 추후 추가 가능)
         if (!existingRecord.getAuthorId().equals(authorId)) {
-            throw new BaseException(OneYouStatusCode.UserForbidden);
+            throw new BaseException(OneYouStatusCode.USER_FORBIDDEN);
         }
 
         NoticeRecord updatedRecord = noticeRepository.updateNotice(
@@ -86,7 +86,7 @@ public class NoticeService {
 
         // 작성자가 본인인지 확인 (관리자 권한 체크는 추후 추가 가능)
         if (!existingRecord.getAuthorId().equals(authorId)) {
-            throw new BaseException(OneYouStatusCode.UserForbidden);
+            throw new BaseException(OneYouStatusCode.USER_FORBIDDEN);
         }
 
         if (!noticeRepository.deleteNotice(noticeUuid)) {

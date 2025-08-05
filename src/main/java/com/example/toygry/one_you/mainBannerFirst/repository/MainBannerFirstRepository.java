@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.CaseConditionStep;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
-import org.jooq.impl.QOM;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;

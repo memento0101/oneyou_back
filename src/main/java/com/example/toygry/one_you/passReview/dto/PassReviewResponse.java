@@ -1,6 +1,5 @@
 package com.example.toygry.one_you.passReview.dto;
 
-import com.example.toygry.one_you.jooq.generated.tables.pojos.PassReview;
 import org.jooq.Record;
 
 import java.time.LocalDateTime;

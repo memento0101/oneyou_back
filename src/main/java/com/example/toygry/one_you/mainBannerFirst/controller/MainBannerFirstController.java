@@ -33,7 +33,6 @@ public class MainBannerFirstController {
     }
 
     @Operation(summary = "배너 활성화 여부 변경", description = "배너의 활성화 여부를 변경합니다, 최대 5개까지 활성화 가능")
-    // 배너 활성화 변경
     @PatchMapping("/{id}/active")
     public ApiResponse<String> updateBannerActive(
             @PathVariable UUID id
@@ -43,7 +42,6 @@ public class MainBannerFirstController {
     }
 
     @Operation(summary = "배너 순서 변경", description = "배너의 순서를 변경합니다")
-    // 배너 순서 변경
     @PutMapping("/order")
     public ApiResponse<String> updateBannerOrder(@RequestBody List<MainBannerFirstOrderItem> request) {
         mainBannerFirstService.updateBannerOrder(request);
@@ -51,7 +49,6 @@ public class MainBannerFirstController {
     }
 
     @Operation(summary = "배너 생성", description = "새로운 배너를 생성합니다 기본적으로 비활성화 되어있습니다")
-    // 배너 생성
     @PostMapping
     public ApiResponse<String> createBanner(@RequestBody MainBannerFirstRequest request) {
         mainBannerFirstService.createBanner(request);
@@ -59,7 +56,6 @@ public class MainBannerFirstController {
     }
 
     @Operation(summary = "배너 수정", description = "배너를 수정합니다 순서는 여기서 바꿀 수 없습니다")
-    // 배너 수정
     @PutMapping("/{id}")
     public ApiResponse<String> updateBanner(
             @PathVariable UUID id,
