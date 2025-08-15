@@ -5,7 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,18 +28,12 @@ import java.security.interfaces.RSAPublicKey;
 
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final RSAPublicKey publicKey;
     private final RSAPrivateKey privateKey;
     private final String keyId;
-
-    @Autowired
-    public SecurityConfig(RSAPublicKey publicKey, RSAPrivateKey privateKey, String keyId) {
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
-        this.keyId = keyId;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

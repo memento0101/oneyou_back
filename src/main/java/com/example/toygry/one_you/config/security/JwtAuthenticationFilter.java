@@ -1,9 +1,11 @@
 package com.example.toygry.one_you.config.security;
 
+import com.example.toygry.one_you.common.constants.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,14 +21,10 @@ import java.util.Collections;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtDecoder jwtDecoder;
-
-//    @Autowired
-    public JwtAuthenticationFilter(JwtDecoder jwtDecoder) {
-        this.jwtDecoder = jwtDecoder;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -48,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         principal,
                         null,
-                        Collections.singletonList(new SimpleGrantedAuthority(role))
+                        Collections.singletonList(new SimpleGrantedAuthority(Role.toAuthority(role)))
                 );
 
                 authentication.setDetails(principal);

@@ -20,10 +20,10 @@ public class UsersController {
 
     private final UsersService usersService;
 
-    @Operation(summary = "전체 유저 조회 조회", description = "전체 사용자를 조회합니다.")
+    @Operation(summary = "전체 유저 조회", description = "전체 사용자를 조회합니다.")
     @GetMapping
-    public List<UserResponse> getAllUsers() { // 이거 Pojo 인데 구분이 좀 어려워서 변경 필요
-        return usersService.getAllUsers();
+    public ApiResponse<List<UserResponse>> getAllUsers() {
+        return ApiResponse.success(usersService.getAllUsers());
     }
 
     // 수강생 목표 3 지망 까지 출력
@@ -35,10 +35,11 @@ public class UsersController {
         return ApiResponse.success(usersService.getUserGoal(userTokenPrincipal.getUuid()));
     }
 
-//
-//    // 유저 정보 한개 가져오기
-//    @GetMapping("/info")
-//    public ResponseEntity<Users> getUserInfo(@AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal) {
-//        return ResponseEntity.ok(usersService.getUserById(userTokenPrincipal.getUuid()));
-//    }
+
+    // 유저 정보 한개 가져오기
+    @Operation(summary = "유저 정보 출력", description = "로그인한 사용자의 정보 출력합니다")
+    @GetMapping("/info")
+    public ApiResponse<UserResponse> getUserInfo(@AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal) {
+        return ApiResponse.success(usersService.getUserById(userTokenPrincipal.getUuid()));
+    }
 }

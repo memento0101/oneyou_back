@@ -3,6 +3,7 @@ package com.example.toygry.one_you.chat.controller;
 import com.example.toygry.one_you.chat.dto.ChatMessage;
 import com.example.toygry.one_you.chat.dto.ChatUserInfo;
 import com.example.toygry.one_you.chat.service.ChatService;
+import com.example.toygry.one_you.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -69,7 +70,7 @@ public class ChatController {
 
     @GetMapping("/api/chat/users/{roomId}")
     @ResponseBody
-    public Set<String> getUserNames(@PathVariable String roomId) {
-        return chatService.getUsers(roomId);
+    public ApiResponse<Set<String>> getUserNames(@PathVariable String roomId) {
+        return ApiResponse.success(chatService.getUsers(roomId));
     }
 }
