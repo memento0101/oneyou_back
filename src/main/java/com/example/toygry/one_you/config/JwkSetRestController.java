@@ -2,7 +2,6 @@ package com.example.toygry.one_you.config;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +18,6 @@ public class JwkSetRestController {
 
     private final JWKSet jwkSet;
 
-    @Autowired
     public JwkSetRestController(RSAPublicKey publicKey, RSAPrivateKey privateKey, String keyId) {
         // Create RSAKey from public and private keys
         RSAKey rsaKey = new RSAKey.Builder(publicKey)

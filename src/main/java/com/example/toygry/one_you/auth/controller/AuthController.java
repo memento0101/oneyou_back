@@ -3,11 +3,10 @@ package com.example.toygry.one_you.auth.controller;
 import com.example.toygry.one_you.auth.dto.LoginRequest;
 import com.example.toygry.one_you.auth.dto.TokenResponse;
 import com.example.toygry.one_you.auth.service.JwtTokenService;
+import com.example.toygry.one_you.common.response.ApiResponse;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.service.UsersService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,20 +18,11 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final JwtTokenService jwtTokenService;
     private final UsersService usersService;
-
-
-    @Autowired
-    public AuthController(
-            JwtTokenService jwtTokenService,
-            UsersService usersService
-    ) {
-        this.jwtTokenService = jwtTokenService;
-        this.usersService = usersService;
-    }
 
     /**
      * Authenticate user and generate JWT token
@@ -41,9 +31,9 @@ public class AuthController {
      * @return JWT token
      */
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ApiResponse<TokenResponse> login(@RequestBody LoginRequest loginRequest) {
         // Return token response
-        return ResponseEntity.ok(jwtTokenService.generateToken(loginRequest));
+        return ApiResponse.success(jwtTokenService.generateToken(loginRequest));
     }
 
     /**
@@ -54,17 +44,17 @@ public class AuthController {
      * @return Token validity status
      */
     @GetMapping("/token/validate")
-    public Map<String, Object> validateToken(Authentication authentication) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("valid", true);
-        response.put("username", authentication.getName());
-        return response;
+    public ApiResponse<Map<String, Object>> validateToken(Authentication authentication) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("valid", true);
+        data.put("username", authentication.getName());
+        return ApiResponse.success(data);
     }
 
     // 회원가입 (학생 등록) => 선생님 등록은 별도로 추가 필요
     @PostMapping("/register")
-    public ResponseEntity<Void> insertStudent(@RequestBody UserInsertRequest request) {
+    public ApiResponse<String> insertStudent(@RequestBody UserInsertRequest request) {
         usersService.insertStudent(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ApiResponse.success("회원가입이 완료되었습니다.");
     }
 }

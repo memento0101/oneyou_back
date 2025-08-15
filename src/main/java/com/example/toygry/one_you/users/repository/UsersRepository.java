@@ -37,6 +37,11 @@ public class UsersRepository {
                 .where(USERS.USER_ID.eq(username))
                 .fetchOneInto(Users.class);
     }
+    public Users findByID(UUID id) {
+        return dsl.selectFrom(USERS)
+                .where(USERS.ID.eq(id))
+                .fetchOneInto(Users.class);
+    }
 
     public void insertStudent(UserInsertRequest request) {
         String goalJson = toJson(request.goalUniversities());
