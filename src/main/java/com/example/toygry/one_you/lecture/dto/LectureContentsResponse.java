@@ -12,7 +12,7 @@ public record LectureContentsResponse(
         String type,      // LIVE, VIDEO, QUIZ
 
         // LIVE or VIDEO 공통
-        String videoUrl,
+        VideoInfo video,
         String contents,
 
         // 비디오 전용
@@ -24,12 +24,12 @@ public record LectureContentsResponse(
 ) {
 
     // 비디오 강의 응답 생성
-    public static LectureContentsResponse ofVideo(LectureDetailRecord detail, LectureContentRecord content, StudentReviewSubmissionRecord submission) {
+    public static LectureContentsResponse ofVideo(LectureDetailRecord detail, LectureContentRecord content, VideoRecord video, StudentReviewSubmissionRecord submission) {
         return new LectureContentsResponse(
                 detail.getId(),
                 detail.getTitle(),
                 detail.getType(),
-                content.getVideoUrl(),
+                video != null ? VideoInfo.from(video) : null,
                 content.getContents(),
                 submission != null ? submission.getReviewUrl() : null,
                 submission != null ? submission.getTeacherFeedback() : null,
@@ -38,12 +38,12 @@ public record LectureContentsResponse(
     }
 
     // 라이브 강의 응답 생성
-    public static LectureContentsResponse ofLive(LectureDetailRecord detail, LectureContentRecord content) {
+    public static LectureContentsResponse ofLive(LectureDetailRecord detail, LectureContentRecord content, VideoRecord video) {
         return new LectureContentsResponse(
                 detail.getId(),
                 detail.getTitle(),
                 detail.getType(),
-                content.getVideoUrl(),
+                video != null ? VideoInfo.from(video) : null,
                 content.getContents(),
                 null,
                 null,
@@ -85,4 +85,29 @@ public record LectureContentsResponse(
             UUID optionId,
             String optionText
     ) {}
+
+    // 비디오 정보
+    public record VideoInfo(
+            UUID videoId,
+            String title,
+            String platform,
+            String externalVideoId,
+            String embedUrl,
+            String thumbnailUrl,
+            Boolean isLive,
+            String liveStatus
+    ) {
+        public static VideoInfo from(VideoRecord video) {
+            return new VideoInfo(
+                    video.getId(),
+                    video.getTitle(),
+                    video.getPlatform(),
+                    video.getExternalVideoId(),
+                    video.getEmbedUrl(),
+                    video.getThumbnailUrl(),
+                    video.getIsLive(),
+                    video.getLiveStatus()
+            );
+        }
+    }
 }
