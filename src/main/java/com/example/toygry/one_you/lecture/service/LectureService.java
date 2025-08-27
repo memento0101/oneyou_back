@@ -80,11 +80,15 @@ public class LectureService {
             // 비디오 강의면 학생 과제 조회
             StudentReviewSubmissionRecord submission = lectureRepository
                     .fetchStudentReviewSubmission(request.lectureDetailId(), userId);
-            return LectureContentsResponse.ofVideo(detail, content, submission);
+            // 비디오 정보 조회
+            VideoRecord video = lectureRepository.fetchVideoByContentId(request.lectureDetailId());
+            return LectureContentsResponse.ofVideo(detail, content, video, submission);
         }
 
         if ("LIVE".equalsIgnoreCase(request.type())) {
-            return LectureContentsResponse.ofLive(detail, content);
+            // 라이브 비디오 정보 조회
+            VideoRecord video = lectureRepository.fetchVideoByContentId(request.lectureDetailId());
+            return LectureContentsResponse.ofLive(detail, content, video);
         }
 
         throw new BaseException(OneYouStatusCode.BAD_REQUEST, "알 수 없는 강의 유형입니다.");

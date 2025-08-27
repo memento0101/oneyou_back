@@ -72,6 +72,14 @@ public class LectureRepository {
                 .fetchOneInto(LectureContentRecord.class);
     }
 
+    public VideoRecord fetchVideoByContentId(UUID lectureDetailId) {
+        return dsl.select(VIDEO.fields())
+                .from(LECTURE_CONTENT)
+                .join(VIDEO).on(LECTURE_CONTENT.VIDEO_ID.eq(VIDEO.ID))
+                .where(LECTURE_CONTENT.LECTURE_DETAIL_ID.eq(lectureDetailId))
+                .fetchOneInto(VideoRecord.class);
+    }
+
     public StudentReviewSubmissionRecord fetchStudentReviewSubmission(UUID lectureDetailId, UUID userId) {
         return dsl.selectFrom(STUDENT_REVIEW_SUBMISSION)
                 .where(STUDENT_REVIEW_SUBMISSION.LECTURE_DETAIL_ID.eq(lectureDetailId)
