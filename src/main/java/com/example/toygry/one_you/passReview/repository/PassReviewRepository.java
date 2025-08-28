@@ -1,5 +1,6 @@
 package com.example.toygry.one_you.passReview.repository;
 
+import com.example.toygry.one_you.jooq.generated.tables.records.PassReviewRecord;
 import com.example.toygry.one_you.passReview.dto.PassReviewRequest;
 import com.example.toygry.one_you.passReview.dto.PassReviewResponse;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.example.toygry.one_you.jooq.generated.Tables.PASS_REVIEW;
@@ -36,6 +38,32 @@ public class PassReviewRepository {
                 .set(PASS_REVIEW.CREATED_AT, LocalDateTime.now())
                 .set(PASS_REVIEW.UPDATED_AT, LocalDateTime.now())
                 .execute();
+    }
+
+    public Optional<PassReviewRecord> findByIdAndUserId(UUID reviewId, UUID userId) {
+        return Optional.ofNullable(
+                dsl.selectFrom(PASS_REVIEW)
+                        .where(PASS_REVIEW.ID.eq(reviewId))
+                        .and(PASS_REVIEW.USER_ID.eq(userId))
+                        .fetchOne()
+        );
+    }
+
+    public PassReviewRecord updateReview(UUID reviewId, int passYear, String targetUniversity, String title, String content) {
+        LocalDateTime now = LocalDateTime.now();
+
+        dsl.update(PASS_REVIEW)
+                .set(PASS_REVIEW.PASS_YEAR, passYear)
+                .set(PASS_REVIEW.TARGET_UNIVERSITY, targetUniversity)
+                .set(PASS_REVIEW.TITLE, title)
+                .set(PASS_REVIEW.CONTENTS, content)
+                .set(PASS_REVIEW.UPDATED_AT, now)
+                .where(PASS_REVIEW.ID.eq(reviewId))
+                .execute();
+
+        return dsl.selectFrom(PASS_REVIEW)
+                .where(PASS_REVIEW.ID.eq(reviewId))
+                .fetchOne();
     }
 
 

@@ -4,16 +4,23 @@ import com.example.toygry.one_you.common.response.ApiResponse;
 import com.example.toygry.one_you.config.security.UserTokenPrincipal;
 import com.example.toygry.one_you.passReview.dto.PassReviewRequest;
 import com.example.toygry.one_you.passReview.dto.PassReviewResponse;
+import com.example.toygry.one_you.passReview.dto.PassReviewUpdateRequest;
 import com.example.toygry.one_you.passReview.service.PassReviewService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
-@RequestMapping("/api/pass")
+@RequestMapping("/pass")
+@Tag(name = "합격생 리뷰", description = "합격생 리뷰 관련 API")
 @RequiredArgsConstructor
 public class PassReviewController {
 
@@ -33,5 +40,22 @@ public class PassReviewController {
     ) {
         passReviewService.createPassReview(userPrincipal, passReviewRequest);
         return ApiResponse.success("성공적으로 생성했습니다.");
+    }
+
+    @Operation(summary = "합격생 리뷰 수정", description = "내가 작성한 리뷰 수정")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "후기 수정 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "후기를 찾을 수 없음")
+    })
+    @PutMapping("/{passReviewId}")
+    public ApiResponse<PassReviewResponse> updatePassReview(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserTokenPrincipal userPrincipal,
+            @Parameter(description = "후기 id") @PathVariable String passReviewId,
+            @Valid @RequestBody PassReviewUpdateRequest request
+    ) {
+        PassReviewResponse response = passReviewService.updatePassReview(userPrincipal.getUuid(), passReviewId, request);
+        return ApiResponse.success(response);
     }
 }

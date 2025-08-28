@@ -7,6 +7,7 @@ import com.example.toygry.one_you.common.response.ApiResponse;
 import com.example.toygry.one_you.users.dto.TeacherInsertRequest;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.service.UsersService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "로그인, 회원가입", description = "로그인, 회원가입과 같은 회원 관련 APㅑ")
 @RequiredArgsConstructor
 public class AuthController {
 
