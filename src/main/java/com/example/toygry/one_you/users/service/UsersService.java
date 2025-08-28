@@ -3,6 +3,7 @@ package com.example.toygry.one_you.users.service;
 import com.example.toygry.one_you.common.exception.BaseException;
 import com.example.toygry.one_you.common.exception.OneYouStatusCode;
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
+import com.example.toygry.one_you.users.dto.TeacherInsertRequest;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.dto.UserResponse;
 import com.example.toygry.one_you.users.repository.UsersRepository;
@@ -65,6 +66,10 @@ public class UsersService {
 
     public void insertStudent(UserInsertRequest request) {
         usersRepository.insertStudent(request);
+    }
+
+    public void insertTeacher(TeacherInsertRequest request) {
+        usersRepository.insertTeacher(request);
     }
 
     public UserResponse getUserById(UUID id) {

@@ -68,7 +68,7 @@ public class ChatController {
         messagingTemplate.convertAndSend("/topic/" + chatMessage.roomId(), leaveMessage);
     }
 
-    @GetMapping("/api/chat/users/{roomId}")
+    @GetMapping("/chat/users/{roomId}")
     @ResponseBody
     public ApiResponse<Set<String>> getUserNames(@PathVariable String roomId) {
         return ApiResponse.success(chatService.getUsers(roomId));

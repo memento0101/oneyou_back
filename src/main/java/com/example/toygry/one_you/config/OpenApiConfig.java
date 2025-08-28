@@ -26,7 +26,7 @@ public class OpenApiConfig {
                                 .email("contact@oneyou.com")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8080")
+                                .url("http://localhost:8080/api")
                                 .description("개발 서버")))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new io.swagger.v3.oas.models.Components()

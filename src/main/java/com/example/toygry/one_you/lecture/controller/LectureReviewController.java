@@ -18,7 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/lectures")
+@RequestMapping("/lectures")
 @RequiredArgsConstructor
 @Tag(name = "수강후기 관리", description = "수강후기 작성, 조회, 수정, 삭제 관련 API")
 @SecurityRequirement(name = "Bearer Authentication")

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/lectures")
+@RequestMapping("/lectures")
 @RequiredArgsConstructor
 @Tag(name = "강의 관리", description = "강의 목록, 상세 정보, 콘텐츠 조회 관련 API")
 @SecurityRequirement(name = "Bearer Authentication")
