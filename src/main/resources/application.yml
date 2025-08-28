@@ -24,5 +24,13 @@ jwt:
 springdoc:
   api-docs:
     enabled: true
+    path: /v3/api-docs
   swagger-ui:
     enabled: true
+    path: /swagger-ui.html
+  server:
+    url: http://localhost:8080/api
+
+server:
+  servlet:
+    context-path: /api

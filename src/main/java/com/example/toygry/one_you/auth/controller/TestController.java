@@ -12,7 +12,7 @@ import java.util.Map;
  * Controller for testing authentication
  */
 @RestController
-@RequestMapping("/api/test")
+@RequestMapping("/test")
 public class TestController {
 
     /**

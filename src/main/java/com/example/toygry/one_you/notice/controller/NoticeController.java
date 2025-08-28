@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/notice")
+@RequestMapping("/notice")
 @RequiredArgsConstructor
 @Tag(name = "공지사항", description = "공지사항 작성, 조회, 수정, 삭제 관련 API")
 @SecurityRequirement(name = "Bearer Authentication")

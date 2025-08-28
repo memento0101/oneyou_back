@@ -47,7 +47,7 @@ public class SecurityConfig {
                     )
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/.well-known/jwks.json", "/ws-chat/**", "/api/chat/**").permitAll() // 인증 관련 엔드포인트는 허용 TODO 채팅쪽 제거 필요
+                        .requestMatchers("/auth/**", "/.well-known/jwks.json", "/ws-chat/**", "/chat/**").permitAll() // context-path 고려하여 /api 제거
                         // Swagger UI 및 OpenAPI 문서 접근 허용
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs", "/v3/api-docs.yaml", "/swagger-resources/**", "/webjars/**").permitAll()
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
