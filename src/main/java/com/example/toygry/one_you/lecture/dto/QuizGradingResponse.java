@@ -17,7 +17,6 @@ public record QuizGradingResponse(
                         String selectedOptionText,
                         UUID correctOptionId,
                         String correctOptionText,
-                        boolean isCorrect,
-                        String hint) {
+                        boolean isCorrect) {
         }
 }
