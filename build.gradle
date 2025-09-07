@@ -63,9 +63,9 @@ jooq {
 
                 jdbc {
                     driver = 'org.postgresql.Driver'
-                    url = 'jdbc:postgresql://localhost:5432/one_you'
-                    user = 'test'
-                    password = 'test'
+                    url = System.getProperty('jooq.db.url', 'jdbc:postgresql://localhost:5432/one_you')
+                    user = System.getProperty('jooq.db.user', 'test')
+                    password = System.getProperty('jooq.db.password', 'test')
                 }
 
                 generator {

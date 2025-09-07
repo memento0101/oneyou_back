@@ -1,0 +1,74 @@
+# 로컬 개발 환경 설정
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/one_you}
+    username: ${DB_USERNAME:test}
+    password: ${DB_PASSWORD:test}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/.well-known/jwks.json}
+
+  # 개발 편의를 위한 설정
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+# Swagger 설정 - 로컬에서 활성화
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  show-actuator: true
+
+# 로깅 설정 - 로컬 개발
+logging:
+  level:
+    root: INFO
+    com.example.toygry.one_you: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.jooq: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# 서버 설정
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: always
+    include-message: always
+    include-binding-errors: always
+
+# 모니터링 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+# CORS 설정 - 로컬환경 전체 허용
+cors:
+  allowed-origins: "*"
+  allowed-methods: "*"
+  allowed-headers: "*"
+  allow-credentials: false
