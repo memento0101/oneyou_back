@@ -40,13 +40,11 @@ springdoc:
 logging:
   level:
     root: INFO
-    com.example.toygry.one_you: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.security: DEBUG
-    org.jooq: DEBUG
-    org.springframework.web.servlet.mvc.method.annotation: TRACE
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.example.toygry.one_you: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.jooq: INFO
+    org.hibernate.SQL: INFO
 
 # 서버 설정
 server:
