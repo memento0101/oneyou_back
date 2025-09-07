@@ -149,10 +149,7 @@ public class LectureService {
                 correctAnswers++;
             }
 
-            // 힌트는 틀린 경우에만 제공
-            String hint = isCorrect ? null : quiz.getHint();
-
-            // 결과 추가
+            // 결과 추가 (hint 제거)
             results.add(new QuizGradingResponse.QuizResult(
                     quiz.getId(),
                     quiz.getQuestion(),
@@ -160,8 +157,7 @@ public class LectureService {
                     selectedOption.getOptionText(),
                     correctOption.getId(),
                     correctOption.getOptionText(),
-                    isCorrect,
-                    hint
+                    isCorrect
             ));
         }
 

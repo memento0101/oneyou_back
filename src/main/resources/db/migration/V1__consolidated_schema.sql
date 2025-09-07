@@ -142,12 +142,11 @@ CREATE TABLE lecture_content (
     updated_at TIMESTAMP DEFAULT now()
 );
 
--- 강의 퀴즈 (V5에서 hint 컬럼 추가됨)
+-- 강의 퀴즈
 CREATE TABLE lecture_quiz (
     id UUID PRIMARY KEY,
     lecture_detail_id UUID NOT NULL REFERENCES lecture_detail(id),
     question TEXT NOT NULL,
-    hint TEXT,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );
@@ -425,17 +424,51 @@ VALUES
     ('88888888-8888-8888-8888-888888888888', '55555555-5555-5555-5555-555555555555', '11111111-1111-1111-1111-111111111111', '가속도 운동 내용입니다.', NOW(), NOW()),
     ('99999999-9999-9999-9999-999999999999', '66666666-6666-6666-6666-666666666666', '22222222-2222-2222-2222-222222222222', '원운동 라이브 수업입니다.', NOW(), NOW());
 
-INSERT INTO lecture_quiz (id, lecture_detail_id, question, hint, created_at, updated_at)
-VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777', 
-        '다음 중 속력의 단위가 아닌 것은?', '속력은 거리를 시간으로 나눈 값입니다. 질량(kg)은 속력의 단위가 아닙니다.', NOW(), NOW());
+INSERT INTO lecture_quiz (id, lecture_detail_id, question, created_at, updated_at)
+VALUES 
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777', 
+     '다음 중 속력의 단위가 아닌 것은?', NOW(), NOW()),
+    ('bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777',
+     '뉴턴의 제1법칙(관성의 법칙)에 대한 설명으로 옳은 것은?', NOW(), NOW()),
+    ('ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777',
+     '가속도의 단위는 무엇인가?', NOW(), NOW()),
+    ('ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777',
+     '다음 중 벡터량이 아닌 것은?', NOW(), NOW()),
+    ('eeeeaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777',
+     '등속도 운동에서 가속도는 얼마인가?', NOW(), NOW());
 
 INSERT INTO lecture_quiz_option (id, lecture_quiz_id, option_text, is_correct)
 VALUES
+    -- 1번 문제: 속력의 단위
     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm/s', false),
     ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'km/h', false),
     ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm/s^2', false),
     ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'kg', true),
-    ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'cm/s', false);
+    ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'cm/s', false),
+    
+    -- 2번 문제: 뉴턴의 제1법칙
+    ('11111111-1111-1111-1111-111111111111', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '힘이 작용하면 물체는 반드시 운동한다', false),
+    ('22222222-2222-2222-2222-222222222222', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '외력이 0이면 물체는 등속직선운동을 한다', true),
+    ('33333333-3333-3333-3333-333333333333', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '가속도는 힘에 비례한다', false),
+    ('44444444-4444-4444-4444-444444444444', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '작용과 반작용은 크기가 같다', false),
+    
+    -- 3번 문제: 가속도의 단위
+    ('55555555-5555-5555-5555-555555555555', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm/s', false),
+    ('66666666-6666-6666-6666-666666666666', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm/s^2', true),
+    ('77777777-7777-7777-7777-777777777777', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm^2/s', false),
+    ('88888888-8888-8888-8888-888888888888', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'N', false),
+    
+    -- 4번 문제: 벡터량이 아닌 것
+    ('99999999-9999-9999-9999-999999999999', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '속도', false),
+    ('aaaabbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '변위', false),
+    ('bbbbcccc-cccc-cccc-cccc-cccccccccccc', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '속력', true),
+    ('ccccdddd-dddd-dddd-dddd-dddddddddddd', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '가속도', false),
+    
+    -- 5번 문제: 등속도 운동의 가속도
+    ('ddddeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'eeeeaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '0', true),
+    ('eeeeffff-ffff-ffff-ffff-ffffffffffff', 'eeeeaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '1', false),
+    ('ffff1111-1111-1111-1111-111111111111', 'eeeeaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '속도와 같다', false),
+    ('11112222-2222-2222-2222-222222222222', 'eeeeaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '시간에 비례한다', false);
 
 -- 학생 수강 및 진행 데이터
 INSERT INTO student_lecture (id, user_id, lecture_id, start_date, expire_date, created_at, updated_at)
