@@ -112,4 +112,18 @@ public class LectureController {
     ) {
         return ApiResponse.success(lectureService.updateLectureProgress(userTokenPrincipal.getUuid(), request));
     }
+
+    @Operation(summary = "과제 제출 확인", description = "학생이 해당 강의에 대해 과제를 제출했는지 확인합니다.", tags = {"과제 관리"})
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
+    @GetMapping("/submission")
+    public ApiResponse<SubmissionCheckResponse> checkSubmission(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserTokenPrincipal userTokenPrincipal,
+            @Parameter(description = "강의 상세 ID", required = true) @RequestParam UUID lectureDetailId
+    ) {
+        return ApiResponse.success(studentLectureService.checkSubmission(userTokenPrincipal.getUuid(), lectureDetailId));
+    }
 }
