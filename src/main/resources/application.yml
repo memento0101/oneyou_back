@@ -17,6 +17,11 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
 
+# 서버 설정 (공통)
+server:
+  servlet:
+    context-path: /api
+
 # JWT Configuration (공통)
 jwt:
   auth:
