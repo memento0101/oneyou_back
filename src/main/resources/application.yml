@@ -1,36 +1,32 @@
 spring:
   application:
     name: one_you
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local} # 기본값: local
   datasource:
-    url: jdbc:postgresql://localhost:5432/one_you
     driver-class-name: org.postgresql.Driver
-    username: test
-    password: test
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8080
-          jwk-set-uri: http://localhost:8080/.well-known/jwks.json
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
 
-# JWT Configuration
+# JWT Configuration (공통)
 jwt:
   auth:
     converter:
       resource-id: one_you-api
       principal-attribute: preferred_username
 
-# Swagger Configuration
-springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-  server:
-    url: http://localhost:8080/api
 
-server:
-  servlet:
-    context-path: /api
+# 공통 로깅 패턴
+logging:
+  pattern:
+    console: "%clr(%d{HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+

@@ -1,0 +1,59 @@
+# 운영 환경 설정
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/one_you}
+    username: ${DB_USERNAME:test}
+    password: ${DB_PASSWORD:test}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080}
+          jwk-set-uri: ${JWT_JWK_SET_URI:http://localhost:8080/.well-known/jwks.json}
+
+# Swagger 설정 - 운영환경에서는 비활성화
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+# 로깅 설정 - 운영 환경 (보안 중심)
+logging:
+  level:
+    root: WARN
+    com.example.toygry.one_you: INFO
+    org.springframework: WARN
+    org.jooq: WARN
+    org.hibernate: WARN
+
+# 서버 설정 - 운영 환경
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+
+# 모니터링 설정 - 운영 환경
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: never
+
+# CORS 설정 - 운영환경 전체 허용
+cors:
+  allowed-origins: "*"
+  allowed-methods: "*"
+  allowed-headers: "*"
+  allow-credentials: false

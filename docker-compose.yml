@@ -1,0 +1,23 @@
+# Docker Compose for local development and testing
+# 기존 PostgreSQL 컨테이너 (one_you_pg) 활용
+version: '3.8'
+
+services:
+  # Spring Boot Application (기존 PostgreSQL 사용)
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: one-you-app
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # host.docker.internal = 호스트의 localhost에 접근
+      DB_URL: jdbc:postgresql://host.docker.internal:5432/one_you
+      DB_USERNAME: test
+      DB_PASSWORD: test
+      JWT_ISSUER_URI: http://localhost:8080
+      JWT_JWK_SET_URI: http://localhost:8080/.well-known/jwks.json
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    # 기존 PostgreSQL이 실행 중이므로 depends_on 제거
