@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/home/first")
+@RequestMapping("/home/first")
 @RequiredArgsConstructor
 public class MainBannerFirstController {
 

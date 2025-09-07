@@ -41,12 +41,12 @@ public class JwtTokenService {
         // Authenticate user
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
+                        loginRequest.username(),
+                        loginRequest.password()
                 )
         );
 
-        Users dbUser = usersRepository.findByUsername(loginRequest.getUsername());
+        Users dbUser = usersRepository.findByUsername(loginRequest.username());
         String uuid = dbUser.getId().toString();
         String role = dbUser.getRole();
 

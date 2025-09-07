@@ -1,5 +1,6 @@
 package com.example.toygry.one_you.lecture.repository;
 
+import com.example.toygry.one_you.common.constants.Role;
 import com.example.toygry.one_you.lecture.dto.StudentLectureResponse;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -22,8 +23,8 @@ public class StudentLectureRepository {
         LocalDateTime now = LocalDateTime.now();
 
         return dsl.select(
-                        TEACHER.ID.as("teacherId"),
-                        TEACHER.NAME.as("teacherName"),
+                        USERS.ID.as("teacherId"),
+                        USERS.NAME.as("teacherName"),
                         LECTURE.ID.as("lectureId"),
                         LECTURE.TITLE.as("lectureTitle"),
                         LECTURE.IMAGE,
@@ -31,7 +32,7 @@ public class StudentLectureRepository {
                 )
                 .from(STUDENT_LECTURE)
                 .join(LECTURE).on(STUDENT_LECTURE.LECTURE_ID.eq(LECTURE.ID))
-                .join(TEACHER).on(LECTURE.TEACHER_ID.eq(TEACHER.ID))
+                .join(USERS).on(LECTURE.TEACHER_ID.eq(USERS.ID).and(USERS.ROLE.eq(Role.TEACHER)))
                 .where(STUDENT_LECTURE.USER_ID.eq(userId)
                         .and(STUDENT_LECTURE.EXPIRE_DATE.gt(now)))
                 .fetchInto(StudentLectureResponse.class);

@@ -4,6 +4,7 @@ import com.example.toygry.one_you.auth.dto.LoginRequest;
 import com.example.toygry.one_you.auth.dto.TokenResponse;
 import com.example.toygry.one_you.auth.service.JwtTokenService;
 import com.example.toygry.one_you.common.response.ApiResponse;
+import com.example.toygry.one_you.users.dto.TeacherInsertRequest;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.Map;
  * Controller for handling authentication requests
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -56,5 +57,11 @@ public class AuthController {
     public ApiResponse<String> insertStudent(@RequestBody UserInsertRequest request) {
         usersService.insertStudent(request);
         return ApiResponse.success("회원가입이 완료되었습니다.");
+    }
+
+    @PostMapping("/register/teacher")
+    public ApiResponse<String> insertTeacher(@RequestBody TeacherInsertRequest request) {
+        usersService.insertTeacher(request);
+        return ApiResponse.success("선생님 계정 생성이 완료되었습니다");
     }
 }

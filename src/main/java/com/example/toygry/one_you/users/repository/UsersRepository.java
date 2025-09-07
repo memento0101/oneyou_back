@@ -1,6 +1,7 @@
 package com.example.toygry.one_you.users.repository;
 
 import com.example.toygry.one_you.jooq.generated.tables.pojos.Users;
+import com.example.toygry.one_you.users.dto.TeacherInsertRequest;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.dto.UserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -63,6 +64,19 @@ public class UsersRepository {
                 .set(USERS.CREATED_AT, LocalDateTime.now())
                 .set(USERS.UPDATED_AT, LocalDateTime.now())
                 .set(USERS.ROLE,"STUDENT")
+                .execute();
+    }
+
+    public void insertTeacher(TeacherInsertRequest request) {
+        dsl.insertInto(USERS)
+                .set(USERS.ID, UUID.randomUUID())
+                .set(USERS.USER_ID, request.userId())
+                .set(USERS.PASSWORD, passwordEncoder.encode(request.password()))
+                .set(USERS.NAME, request.name())
+                .set(USERS.IMAGE, request.image())
+                .set(USERS.ROLE, "TEACHER")
+                .set(USERS.CREATED_AT, LocalDateTime.now())
+                .set(USERS.UPDATED_AT, LocalDateTime.now())
                 .execute();
     }
 
