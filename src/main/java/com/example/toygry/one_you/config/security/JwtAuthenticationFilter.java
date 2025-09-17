@@ -12,7 +12,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -20,7 +19,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.UUID;
 
-@Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -35,24 +33,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authorization.substring(7); // 앞에 7개 잘라버리기
 
             try {
+                // JWT 토큰 디코딩 및 검증
                 Jwt jwt = jwtDecoder.decode(token);
 
                 String uuid = jwt.getClaimAsString("uuid");
                 String username = jwt.getSubject();
                 String role = jwt.getClaimAsString("role");
+                UUID userId = UUID.fromString(uuid);
 
-                UserTokenPrincipal principal = new UserTokenPrincipal(UUID.fromString(uuid), username, role);
+                // 디버깅용 로그 추가
+                String authority = Role.toAuthority(role);
+                System.out.println("JWT Authentication - Username: " + username + ", Role: " + role + ", Authority: " + authority);
+
+                // 인증 성공 - SecurityContext에 설정
+                UserTokenPrincipal principal = new UserTokenPrincipal(userId, username, role);
 
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         principal,
                         null,
-                        Collections.singletonList(new SimpleGrantedAuthority(Role.toAuthority(role)))
+                        Collections.singletonList(new SimpleGrantedAuthority(authority))
                 );
 
                 authentication.setDetails(principal);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                // 권한 설정 확인 로그
+                System.out.println("Authentication authorities: " + authentication.getAuthorities());
+                System.out.println("Request URI: " + request.getRequestURI());
             } catch (JwtException e) {
-                // 알아서 401
+                // JWT 파싱/검증 실패 -> 401
+                SecurityContextHolder.clearContext();
             }
         }
         filterChain.doFilter(request, response);

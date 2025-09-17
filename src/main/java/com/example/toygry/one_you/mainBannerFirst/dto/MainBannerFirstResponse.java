@@ -5,7 +5,7 @@ import org.jooq.Record;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static com.example.toygry.one_you.jooq.generated.tables.MainBannerFirst.MAIN_BANNER_FIRST;
+import static com.example.toygry.one_you.jooq.generated.tables.MainBanner.MAIN_BANNER;
 
 
 public record MainBannerFirstResponse(
@@ -20,14 +20,14 @@ public record MainBannerFirstResponse(
 ) {
     public static MainBannerFirstResponse fromRecord(Record record) {
         return new MainBannerFirstResponse(
-                record.get(MAIN_BANNER_FIRST.ID),
-                record.get(MAIN_BANNER_FIRST.TITLE),
-                record.get(MAIN_BANNER_FIRST.IMAGE),
-                record.get(MAIN_BANNER_FIRST.URL),
-                record.get(MAIN_BANNER_FIRST.BANNER_ORDER),
-                record.get(MAIN_BANNER_FIRST.ACTIVE),
-                record.get(MAIN_BANNER_FIRST.CREATED_AT),
-                record.get(MAIN_BANNER_FIRST.UPDATED_AT)
+                record.get(MAIN_BANNER.ID),
+                record.get(MAIN_BANNER.TITLE),
+                record.get(MAIN_BANNER.IMAGE),
+                record.get(MAIN_BANNER.URL),
+                record.get(MAIN_BANNER.BANNER_ORDER),
+                record.get(MAIN_BANNER.ACTIVE),
+                record.get(MAIN_BANNER.CREATED_AT),
+                record.get(MAIN_BANNER.UPDATED_AT)
         );
     }
 }

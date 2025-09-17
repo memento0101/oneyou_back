@@ -1,5 +1,6 @@
 package com.example.toygry.one_you.config;
 
+import com.example.toygry.one_you.config.security.JwtAuthenticationFilter;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -50,9 +52,14 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**", "/.well-known/jwks.json", "/ws-chat/**", "/chat/**").permitAll() // context-path 고려하여 /api 제거
                         // Swagger UI 및 OpenAPI 문서 접근 허용
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs", "/v3/api-docs.yaml", "/swagger-resources/**", "/webjars/**").permitAll()
+                        // Teacher 전용 API는 TEACHER 권한 필요
+                        .requestMatchers("/teacher/**").hasAuthority("ROLE_TEACHER")
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {})); // JWT 기반 OAuth2 리소스 서버 설정
+                // JWT 커스텀 필터 추가 (순환참조 방지를 위해 직접 생성)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtDecoder()), UsernamePasswordAuthenticationFilter.class);
+                // OAuth2 리소스 서버는 커스텀 필터와 충돌할 수 있어서 제거
+                // .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {}));
         return http.build();
     }
 

@@ -36,12 +36,21 @@ public class UsersService {
 
     private UserResponse toRecord(Users user) {
         try {
-            var goals = objectmapper.readValue(
-                    user.getGoalUniversities().data(),
-                    new TypeReference<List<UserResponse.GoalUniversity>>() {});
-            var eju = objectmapper.readValue(
-                    user.getEjuScores().data(),
-                    new TypeReference<UserResponse.EjuScores>() {});
+            // goal_universities null 체크
+            List<UserResponse.GoalUniversity> goals = null;
+            if (user.getGoalUniversities() != null) {
+                goals = objectmapper.readValue(
+                        user.getGoalUniversities().data(),
+                        new TypeReference<List<UserResponse.GoalUniversity>>() {});
+            }
+
+            // eju_scores null 체크
+            UserResponse.EjuScores eju = null;
+            if (user.getEjuScores() != null) {
+                eju = objectmapper.readValue(
+                        user.getEjuScores().data(),
+                        new TypeReference<UserResponse.EjuScores>() {});
+            }
 
             return new UserResponse(
                     user.getId(),
