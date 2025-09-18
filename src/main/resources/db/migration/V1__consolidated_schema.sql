@@ -228,7 +228,7 @@ CREATE TABLE lecture_review (
 -- 배너 관련 테이블 (V3)
 -- ============================================================================
 
-CREATE TABLE main_banner_first (
+CREATE TABLE main_banner (
     id UUID PRIMARY KEY,
     title TEXT NOT NULL,
     image TEXT NOT NULL,
@@ -555,3 +555,76 @@ EJU에서는 주로 내적이 출제되니 내적 위주로 연습하세요!', '
 따라서 **s = v₀t + ½at²**가 유도됩니다!
 
 이 공식은 EJU에서 매우 자주 출제되니 꼭 기억해두세요.', '2025-08-26 18:30:00', NOW());
+
+-- ============================================================================
+-- 선생님 피드백 API 테스트 데이터
+-- ============================================================================
+
+-- 추가 선생님 계정 (기존에 22222222-2222-2222-2222-222222222222가 있으므로 다른 ID 사용)
+INSERT INTO users (id, user_id, password, name, role, active, created_at, updated_at)
+VALUES 
+    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'teacher1@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '뿡구리', 'TEACHER', true, NOW(), NOW()),
+    ('ffffffff-1111-1111-1111-ffffffffffff', 'teacher2@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '짱구리', 'TEACHER', true, NOW(), NOW());
+
+-- 추가 학생 계정
+INSERT INTO users (id, user_id, password, name, role, student_contact, active, created_at, updated_at)
+VALUES 
+    ('aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'student1@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '김학생', 'STUDENT', '010-1111-1111', true, NOW(), NOW()),
+    ('bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'student2@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '이학생', 'STUDENT', '010-2222-2222', true, NOW(), NOW()),
+    ('cccccccc-2222-2222-2222-cccccccccccc', 'student3@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '박학생', 'STUDENT', '010-3333-3333', true, NOW(), NOW());
+
+-- 김선생님의 추가 강의
+INSERT INTO lecture (id, title, category, course, description, price, textbook_id, teacher_id, period, target, image, url, created_at, updated_at)
+VALUES 
+    ('dddddddd-1111-1111-1111-dddddddddddd', 'EJU 수학 심화', '수학', '수학', '수학 심화 과정', 180000, '22222222-1111-1111-1111-111111111111', 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 120, '수학 고득점 목표', 'image', null, NOW(), NOW()),
+    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'EJU 종합과목', '종합과목', '종합과목', '종합과목 기초', 160000, '33333333-1111-1111-1111-111111111111', 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 100, '종합과목 기초', 'image', null, NOW(), NOW());
+
+-- 박선생님의 강의
+INSERT INTO lecture (id, title, category, course, description, price, textbook_id, teacher_id, period, target, image, url, created_at, updated_at)
+VALUES 
+    ('ffffffff-1111-1111-1111-ffffffffffff', 'EJU 일본어', '일본어', '일본어', '일본어 기초부터 고급까지', 140000, '22222222-1111-1111-1111-111111111111', 'ffffffff-1111-1111-1111-ffffffffffff', 80, '일본어 초급자', 'image', null, NOW(), NOW());
+
+-- 추가 강의 챕터
+INSERT INTO lecture_chapter (id, lecture_id, title, chapter_order, created_at, updated_at)
+VALUES
+    ('dddddddd-2222-2222-2222-dddddddddddd', 'dddddddd-1111-1111-1111-dddddddddddd', '미분과 적분', 1, NOW(), NOW()),
+    ('eeeeeeee-2222-2222-2222-eeeeeeeeeeee', 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', '일본 근현대사', 1, NOW(), NOW()),
+    ('ffffffff-2222-2222-2222-ffffffffffff', 'ffffffff-1111-1111-1111-ffffffffffff', '기초 문법', 1, NOW(), NOW());
+
+-- 추가 강의 세부 내용
+INSERT INTO lecture_detail (id, lecture_chapter_id, title, type, detail_order, created_at, updated_at)
+VALUES
+    ('dddddddd-3333-3333-3333-dddddddddddd', 'dddddddd-2222-2222-2222-dddddddddddd', '미분의 기본 개념', 'VIDEO', 1, NOW(), NOW()),
+    ('eeeeeeee-3333-3333-3333-eeeeeeeeeeee', 'dddddddd-2222-2222-2222-dddddddddddd', '적분의 활용', 'LIVE', 2, NOW(), NOW()),
+    ('ffffffff-3333-3333-3333-ffffffffffff', 'eeeeeeee-2222-2222-2222-eeeeeeeeeeee', '메이지 유신', 'VIDEO', 1, NOW(), NOW()),
+    ('aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'ffffffff-2222-2222-2222-ffffffffffff', '조사와 조동사', 'LIVE', 1, NOW(), NOW());
+
+-- 피드백 대기 중인 학생 제출물 (teacher_feedback이 null)
+INSERT INTO student_review_submission (id, user_id, lecture_detail_id, review_url, teacher_feedback, created_at, updated_at)
+VALUES 
+    -- 김선생님 강의 - EJU 수학 심화
+    ('dddddddd-4444-4444-4444-dddddddddddd', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'dddddddd-3333-3333-3333-dddddddddddd', 'https://youtube.com/watch?v=math_diff_1', null, '2025-09-16 14:30:00', NOW()),
+    ('eeeeeeee-4444-4444-4444-eeeeeeeeeeee', 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'dddddddd-3333-3333-3333-dddddddddddd', 'https://youtube.com/watch?v=math_diff_2', null, '2025-09-16 15:45:00', NOW()),
+    ('ffffffff-4444-4444-4444-ffffffffffff', 'cccccccc-2222-2222-2222-cccccccccccc', 'eeeeeeee-3333-3333-3333-eeeeeeeeeeee', 'https://youtube.com/watch?v=math_integ_1', null, '2025-09-17 09:20:00', NOW()),
+    
+    -- 김선생님 강의 - EJU 종합과목
+    ('aaaaaaaa-4444-4444-4444-aaaaaaaaaaaa', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'ffffffff-3333-3333-3333-ffffffffffff', 'https://youtube.com/watch?v=history_meiji_1', null, '2025-09-17 11:15:00', NOW()),
+    
+    -- 박선생님 강의 - EJU 일본어
+    ('bbbbbbbb-4444-4444-4444-bbbbbbbbbbbb', 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'https://youtube.com/watch?v=japanese_grammar_1', null, '2025-09-17 13:40:00', NOW()),
+    ('cccccccc-4444-4444-4444-cccccccccccc', 'cccccccc-2222-2222-2222-cccccccccccc', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'https://youtube.com/watch?v=japanese_grammar_2', null, '2025-09-17 16:25:00', NOW());
+
+-- 이미 피드백이 완료된 제출물 (비교용)
+INSERT INTO student_review_submission (id, user_id, lecture_detail_id, review_url, teacher_feedback, created_at, updated_at)
+VALUES 
+    ('dddddddd-5555-5555-5555-dddddddddddd', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'eeeeeeee-3333-3333-3333-eeeeeeeeeeee', 'https://youtube.com/watch?v=completed_review', '잘 정리하였습니다. 다음 단계로 진행하세요.', '2025-09-15 10:00:00', NOW());
+
+-- 학생 강의 수강 등록
+INSERT INTO student_lecture (id, user_id, lecture_id, start_date, expire_date, created_at, updated_at)
+VALUES
+    ('dddddddd-6666-6666-6666-dddddddddddd', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'dddddddd-1111-1111-1111-dddddddddddd', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW()),
+    ('eeeeeeee-6666-6666-6666-eeeeeeeeeeee', 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'dddddddd-1111-1111-1111-dddddddddddd', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW()),
+    ('ffffffff-6666-6666-6666-ffffffffffff', 'cccccccc-2222-2222-2222-cccccccccccc', 'dddddddd-1111-1111-1111-dddddddddddd', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW()),
+    ('aaaaaaaa-6666-6666-6666-aaaaaaaaaaaa', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW()),
+    ('bbbbbbbb-6666-6666-6666-bbbbbbbbbbbb', 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'ffffffff-1111-1111-1111-ffffffffffff', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW()),
+    ('cccccccc-6666-6666-6666-cccccccccccc', 'cccccccc-2222-2222-2222-cccccccccccc', 'ffffffff-1111-1111-1111-ffffffffffff', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW());

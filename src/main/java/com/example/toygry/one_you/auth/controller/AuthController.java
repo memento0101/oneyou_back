@@ -3,10 +3,13 @@ package com.example.toygry.one_you.auth.controller;
 import com.example.toygry.one_you.auth.dto.LoginRequest;
 import com.example.toygry.one_you.auth.dto.TokenResponse;
 import com.example.toygry.one_you.auth.service.JwtTokenService;
+import com.example.toygry.one_you.auth.service.TokenRedisService;
 import com.example.toygry.one_you.common.response.ApiResponse;
+import com.example.toygry.one_you.config.security.UserTokenPrincipal;
 import com.example.toygry.one_you.users.dto.TeacherInsertRequest;
 import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.service.UsersService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +26,7 @@ import java.util.Map;
 public class AuthController {
 
     private final JwtTokenService jwtTokenService;
+    private final TokenRedisService tokenRedisService;
     private final UsersService usersService;
 
     /**
@@ -50,6 +54,41 @@ public class AuthController {
         data.put("valid", true);
         data.put("username", authentication.getName());
         return ApiResponse.success(data);
+    }
+
+    /**
+     * 로그아웃 - Redis에서 토큰 삭제
+     * 
+     * @param authentication 인증된 사용자 정보
+     * @return 로그아웃 성공 메시지
+     */
+    @Operation(summary = "로그아웃", description = "사용자 로그아웃 처리 (Redis에서 토큰 즉시 무효화)")
+    @PostMapping("/logout")
+    public ApiResponse<String> logout(Authentication authentication) {
+        UserTokenPrincipal principal = (UserTokenPrincipal) authentication.getPrincipal();
+        
+        // Redis에서 토큰 삭제
+        tokenRedisService.deleteToken(principal.getUuid());
+        
+        return ApiResponse.success("로그아웃되었습니다.");
+    }
+
+    /**
+     * 토큰 갱신 - 새로운 JWT 토큰 발급
+     * 
+     * @param authentication 현재 인증된 사용자 정보
+     * @return 새로운 JWT 토큰
+     */
+    @Operation(summary = "토큰 갱신", description = "기존 토큰으로 새로운 토큰 발급 (TTL 연장)")
+    @PostMapping("/refresh")
+    public ApiResponse<TokenResponse> refreshToken(Authentication authentication) {
+        UserTokenPrincipal principal = (UserTokenPrincipal) authentication.getPrincipal();
+        
+        // 새로운 토큰 생성 (사용자 정보로 재로그인 없이)
+        LoginRequest loginRequest = new LoginRequest(principal.getUsername(), null);
+        TokenResponse newToken = jwtTokenService.generateTokenForRefresh(principal);
+        
+        return ApiResponse.success(newToken);
     }
 
     // 회원가입 (학생 등록) => 선생님 등록은 별도로 추가 필요

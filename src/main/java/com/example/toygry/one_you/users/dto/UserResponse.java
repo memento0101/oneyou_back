@@ -1,5 +1,6 @@
 package com.example.toygry.one_you.users.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,7 @@ public record UserResponse(
     public record EjuScores(
             Integer listening,
             Integer reading,
+            @JsonProperty("total_listen_read")
             Integer totalListenRead,
             Integer science,
             String subject1,

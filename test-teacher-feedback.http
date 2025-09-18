@@ -1,0 +1,423 @@
+### 선생님 피드백 API 테스트
+### 작성일: 2025-09-17
+### 설명: 선생님용 과제 피드백 시스템 테스트
+
+### 변수 설정
+@baseUrl = http://localhost:8080/api
+@teacher1_username = teacher1@test.com
+@teacher2_username = teacher2@test.com
+@password = test
+@teacher1_token = eyJraWQiOiI5NTM1NzZiNi03ODQ0LTQwMWMtOGRlMC03ZWY1ZGM5Yjk3MzMiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyMUB0ZXN0LmNvbSIsInJvbGUiOiJURUFDSEVSIiwic2NvcGUiOiIiLCJpc3MiOiJvbmVfeW91IiwiZXhwIjoxNzU4MDk5MTAxLCJpYXQiOjE3NTgwOTU1MDEsInV1aWQiOiJlZWVlZWVlZS0xMTExLTExMTEtMTExMS1lZWVlZWVlZWVlZWUifQ.WrvdAmySOxPRFCRsgUd4KgrZTroPsm5loWpK34rADWYVzCSEqKMRvhGE21bpu4NjhPXtmrP4LqUhkaJ6crod1bikVzbMwOLa7s3615DiWs0Hu4Ak1rblveQa_cx32RiX8NaVSkOkdKMt2ycBitowF64U-lQRW2rNsnvXwSqda99QElb01x3XX7OLw2Ui9OmvVT-PHnKVrbaWLGSnoAMCe2WoQ1D6iuYih3DKDy4q6PQfYSz9IWhxx8hzx5UVXrSz7NCZ8gl9fhrosNQ_pm9AtdNqQKxHdITYnSuywZV_w8fRCOdlU2KbaazLrWOJp7bPMAGYU_Jxnm7E1cPN1iejzA
+@teacher2_token = 
+
+###############################################
+### 1. 김선생님 로그인 (teacher1@test.com)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "teacher1@test.com",
+  "password": "test"
+}
+
+> {%
+client.test("김선생님 로그인 성공", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.token, "토큰이 존재해야 함");
+    
+    // 토큰을 변수에 저장
+    client.global.set("teacher1_token", response.body.data.token);
+    console.log("김선생님 JWT 토큰:", response.body.data.token);
+});
+%}
+
+###############################################
+### 2. 박선생님 로그인 (teacher2@test.com)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{teacher2_username}}",
+  "password": "{{password}}"
+}
+
+> {%
+client.test("박선생님 로그인 성공", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.token, "토큰이 존재해야 함");
+    
+    // 토큰을 변수에 저장
+    client.global.set("teacher2_token", response.body.data.token);
+    console.log("박선생님 JWT 토큰:", response.body.data.token);
+});
+%}
+
+###############################################
+### 3. 김선생님 - 피드백 대기 과제 목록 조회
+### 김선생님은 2개 강의 (EJU 수학 심화, EJU 종합과목)에서 총 4개 과제 대기
+GET {{baseUrl}}/teacher/assignments/pending-feedback
+Authorization: Bearer {{teacher1_token}}
+
+> {%
+client.test("김선생님 피드백 대기 목록 조회 성공", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.totalPendingCount === 4, "총 4개 과제가 대기 중이어야 함");
+    client.assert(response.body.data.lectureGroups.length === 2, "2개 강의 그룹이 있어야 함");
+    
+    const lectureGroups = response.body.data.lectureGroups;
+    
+    // EJU 수학 심화 강의 확인
+    const mathLecture = lectureGroups.find(g => g.lectureTitle === "EJU 수학 심화");
+    client.assert(mathLecture, "EJU 수학 심화 강의가 존재해야 함");
+    client.assert(mathLecture.pendingCount === 3, "수학 강의에 3개 과제 대기");
+    client.assert(mathLecture.assignments.length === 3, "3개 과제 상세 정보 존재");
+    
+    // EJU 종합과목 강의 확인
+    const historyLecture = lectureGroups.find(g => g.lectureTitle === "EJU 종합과목");
+    client.assert(historyLecture, "EJU 종합과목 강의가 존재해야 함");
+    client.assert(historyLecture.pendingCount === 1, "종합과목 강의에 1개 과제 대기");
+    
+    // 첫 번째 과제 상세 정보 확인
+    const firstAssignment = mathLecture.assignments[0];
+    client.assert(firstAssignment.studentName, "학생 이름이 존재해야 함");
+    client.assert(firstAssignment.reviewUrl.includes("youtube.com"), "유튜브 링크여야 함");
+    client.assert(firstAssignment.detailTitle, "강의 세부 제목이 존재해야 함");
+    
+    console.log("김선생님 피드백 대기 과제:", JSON.stringify(response.body.data, null, 2));
+});
+%}
+
+###############################################
+### 4. 박선생님 - 피드백 대기 과제 목록 조회  
+### 박선생님은 1개 강의 (EJU 일본어)에서 총 2개 과제 대기
+GET {{baseUrl}}/teacher/assignments/pending-feedback
+Authorization: Bearer {{teacher2_token}}
+
+> {%
+client.test("박선생님 피드백 대기 목록 조회 성공", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.totalPendingCount === 2, "총 2개 과제가 대기 중이어야 함");
+    client.assert(response.body.data.lectureGroups.length === 1, "1개 강의 그룹이 있어야 함");
+    
+    const lectureGroups = response.body.data.lectureGroups;
+    const japaneseLecture = lectureGroups[0];
+    
+    client.assert(japaneseLecture.lectureTitle === "EJU 일본어", "EJU 일본어 강의여야 함");
+    client.assert(japaneseLecture.pendingCount === 2, "일본어 강의에 2개 과제 대기");
+    client.assert(japaneseLecture.assignments.length === 2, "2개 과제 상세 정보 존재");
+    
+    // 과제 상세 정보 확인
+    const assignments = japaneseLecture.assignments;
+    assignments.forEach(assignment => {
+        client.assert(assignment.chapterTitle === "기초 문법", "기초 문법 챕터여야 함");
+        client.assert(assignment.detailTitle === "조사와 조동사", "조사와 조동사 세부 강의여야 함");
+        client.assert(assignment.detailType === "LIVE", "라이브 강의 타입이어야 함");
+        client.assert(assignment.reviewUrl.includes("japanese_grammar"), "일본어 문법 관련 유튜브 링크여야 함");
+    });
+    
+    console.log("박선생님 피드백 대기 과제:", JSON.stringify(response.body.data, null, 2));
+});
+%}
+
+###############################################
+### 5. 권한 없는 사용자 테스트 (학생 계정으로 접근)
+### 학생이 선생님 API에 접근하려 할 때
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "test@test.com",
+  "password": "test"
+}
+
+> {%
+client.test("학생 로그인 성공", function() {
+    client.assert(response.status === 200, "학생 로그인 성공");
+    client.global.set("student_token", response.body.data.token);
+});
+%}
+
+###
+
+GET {{baseUrl}}/teacher/assignments/pending-feedback
+Authorization: Bearer {{student_token}}
+
+> {%
+client.test("학생은 선생님 API 접근 불가", function() {
+    // 권한 검증은 Security Config에 따라 403 또는 401 반환
+    client.assert(response.status === 403 || response.status === 401, "권한 없음 에러여야 함");
+});
+%}
+
+###############################################
+### 6. 잘못된 토큰으로 테스트
+GET {{baseUrl}}/teacher/assignments/pending-feedback
+Authorization: Bearer invalid_token_here
+
+> {%
+client.test("잘못된 토큰 거부", function() {
+    client.assert(response.status === 401, "잘못된 토큰은 401이어야 함");
+});
+%}
+
+###############################################
+### 7. Authorization 헤더 없이 테스트
+GET {{baseUrl}}/teacher/assignments/pending-feedback
+
+> {%
+client.test("인증 헤더 없음 거부", function() {
+    client.assert(response.status === 401, "인증 헤더 없으면 401이어야 함");
+});
+%}
+
+###############################################
+### 8. 김선생님 - 첫 번째 과제에 피드백 제출 (완료 처리)
+### EJU 수학 심화 강의의 첫 번째 과제에 피드백 제출 후 완료 처리
+POST {{baseUrl}}/teacher/submissions/ffffffff-4444-4444-4444-ffffffffffff/feedback
+Authorization: Bearer {{teacher1_token}}
+Content-Type: application/json
+
+{
+  "feedback": "미분의 기본 개념을 잘 이해하고 계시네요! 함수의 연속성과 미분가능성의 관계를 정확히 파악했습니다. 다음 단계로 연쇄법칙을 학습해보세요.",
+  "isCompleted": true
+}
+
+> {%
+client.test("김선생님 피드백 제출 성공 (완료)", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data === "피드백이 성공적으로 제출되었습니다.", "성공 메시지 확인");
+    
+    console.log("피드백 제출 성공:", response.body.data);
+});
+%}
+
+###############################################
+### 9. 김선생님 - 두 번째 과제에 피드백 제출 (미완료 처리)
+### EJU 수학 심화 강의의 두 번째 과제에 피드백 제출하되 미완료 처리
+POST {{baseUrl}}/teacher/submissions/eeeeeeee-4444-4444-4444-eeeeeeeeeeee/feedback
+Authorization: Bearer {{teacher1_token}}
+Content-Type: application/json
+
+{
+  "feedback": "미분의 기하학적 의미는 이해했지만, 물리학적 의미에 대한 설명이 부족합니다. 속도와 가속도의 관계를 더 명확히 설명해주세요. 추가 학습이 필요합니다.",
+  "isCompleted": false
+}
+
+> {%
+client.test("김선생님 피드백 제출 성공 (미완료)", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data === "피드백이 성공적으로 제출되었습니다.", "성공 메시지 확인");
+    
+    console.log("피드백 제출 성공 (미완료):", response.body.data);
+});
+%}
+
+###############################################
+### 10. 박선생님 - 일본어 과제에 피드백 제출 (완료 처리)
+### EJU 일본어 강의의 첫 번째 과제에 피드백 제출
+POST {{baseUrl}}/teacher/submissions/bbbbbbbb-1111-1111-1111-111111111111/feedback
+Authorization: Bearer {{teacher2_token}}
+Content-Type: application/json
+
+{
+  "feedback": "조사와 조동사의 사용법을 정확히 이해하고 계십니다. 특히 は와 が의 차이점을 명확히 설명해주셨네요. 다음 단계로 경어법을 학습해보세요.",
+  "isCompleted": true
+}
+
+> {%
+client.test("박선생님 피드백 제출 성공", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data === "피드백이 성공적으로 제출되었습니다.", "성공 메시지 확인");
+    
+    console.log("박선생님 피드백 제출 성공:", response.body.data);
+});
+%}
+
+###############################################
+### 11. 권한 없는 선생님의 피드백 제출 시도
+### 김선생님이 박선생님 강의의 과제에 피드백 제출 시도 (권한 없음)
+POST {{baseUrl}}/teacher/submissions/bbbbbbbb-1111-1111-1111-111111111111/feedback
+Authorization: Bearer {{teacher1_token}}
+Content-Type: application/json
+
+{
+  "feedback": "권한이 없는 피드백입니다.",
+  "isCompleted": true
+}
+
+> {%
+client.test("권한 없는 피드백 제출 거부", function() {
+    client.assert(response.status === 403, "권한 없음으로 403이어야 함");
+    client.assert(response.body.success === false, "success가 false여야 함");
+    client.assert(response.body.error.code === "ACCESS_DENIED", "ACCESS_DENIED 에러여야 함");
+    
+    console.log("권한 없는 피드백 제출 거부됨:", response.body.error.message);
+});
+%}
+
+###############################################
+### 12. 존재하지 않는 제출물에 피드백 시도
+POST {{baseUrl}}/teacher/submissions/99999999-9999-9999-9999-999999999999/feedback
+Authorization: Bearer {{teacher1_token}}
+Content-Type: application/json
+
+{
+  "feedback": "존재하지 않는 제출물입니다.",
+  "isCompleted": true
+}
+
+> {%
+client.test("존재하지 않는 제출물 거부", function() {
+    client.assert(response.status === 400 || response.status === 404, "존재하지 않는 제출물은 400 또는 404여야 함");
+    client.assert(response.body.success === false, "success가 false여야 함");
+    client.assert(response.body.error.code === "SUBMISSION_NOT_FOUND", "SUBMISSION_NOT_FOUND 에러여야 함");
+    
+    console.log("존재하지 않는 제출물 거부됨:", response.body.error.message);
+});
+%}
+
+###############################################
+### 13. 잘못된 요청 데이터로 피드백 제출
+### 피드백 내용이 비어있는 경우
+POST {{baseUrl}}/teacher/submissions/aaaaaaaa-3333-3333-3333-333333333333/feedback
+Authorization: Bearer {{teacher1_token}}
+Content-Type: application/json
+
+{
+  "feedback": "",
+  "isCompleted": true
+}
+
+> {%
+client.test("빈 피드백 내용 거부", function() {
+    client.assert(response.status === 400, "잘못된 요청으로 400이어야 함");
+    client.assert(response.body.success === false, "success가 false여야 함");
+    
+    console.log("빈 피드백 내용 거부됨:", response.body.error.message);
+});
+%}
+
+###############################################
+### 14. 완료 여부 누락된 요청
+POST {{baseUrl}}/teacher/submissions/aaaaaaaa-3333-3333-3333-333333333333/feedback
+Authorization: Bearer {{teacher1_token}}
+Content-Type: application/json
+
+{
+  "feedback": "완료 여부가 누락된 피드백입니다."
+}
+
+> {%
+client.test("완료 여부 누락 거부", function() {
+    client.assert(response.status === 400, "잘못된 요청으로 400이어야 함");
+    client.assert(response.body.success === false, "success가 false여야 함");
+    
+    console.log("완료 여부 누락 거부됨:", response.body.error.message);
+});
+%}
+
+###############################################
+### 15. 피드백 제출 후 대기 목록 재조회
+### 피드백이 제출된 후 대기 목록이 줄어들었는지 확인
+GET {{baseUrl}}/teacher/assignments/pending-feedback
+Authorization: Bearer {{teacher1_token}}
+
+> {%
+client.test("피드백 제출 후 김선생님 대기 목록 감소 확인", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    
+    // 이전에 4개였는데 2개 피드백 제출 후 2개로 감소해야 함
+    client.assert(response.body.data.totalPendingCount === 2, "총 2개 과제가 대기 중이어야 함 (4개에서 2개 감소)");
+    
+    const lectureGroups = response.body.data.lectureGroups;
+    const mathLecture = lectureGroups.find(g => g.lectureTitle === "EJU 수학 심화");
+    
+    // 수학 강의는 3개에서 1개로 감소
+    client.assert(mathLecture.pendingCount === 1, "수학 강의 대기 과제가 1개로 감소해야 함");
+    
+    console.log("피드백 제출 후 대기 목록:", JSON.stringify(response.body.data, null, 2));
+});
+%}
+
+###############################################
+### 16. 박선생님 대기 목록도 재조회
+GET {{baseUrl}}/teacher/assignments/pending-feedback
+Authorization: Bearer {{teacher2_token}}
+
+> {%
+client.test("피드백 제출 후 박선생님 대기 목록 감소 확인", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    
+    // 이전에 2개였는데 1개 피드백 제출 후 1개로 감소해야 함
+    client.assert(response.body.data.totalPendingCount === 1, "총 1개 과제가 대기 중이어야 함 (2개에서 1개 감소)");
+    
+    const lectureGroups = response.body.data.lectureGroups;
+    const japaneseLecture = lectureGroups[0];
+    
+    // 일본어 강의는 2개에서 1개로 감소
+    client.assert(japaneseLecture.pendingCount === 1, "일본어 강의 대기 과제가 1개로 감소해야 함");
+    
+    console.log("박선생님 피드백 제출 후 대기 목록:", JSON.stringify(response.body.data, null, 2));
+});
+%}
+
+###############################################
+### 테스트 시나리오 요약 (업데이트)
+###
+### 1. 김선생님 로그인 → 피드백 대기 과제 4개 조회 (2개 강의)
+###    - EJU 수학 심화: 3개 과제 (미분의 기본 개념 2개, 적분의 활용 1개)
+###    - EJU 종합과목: 1개 과제 (메이지 유신 1개)
+###
+### 2. 박선생님 로그인 → 피드백 대기 과제 2개 조회 (1개 강의)  
+###    - EJU 일본어: 2개 과제 (조사와 조동사 2개)
+###
+### 3. 피드백 제출 테스트:
+###    - 김선생님: 수학 과제 2개에 피드백 제출 (1개 완료, 1개 미완료)
+###    - 박선생님: 일본어 과제 1개에 피드백 제출 (완료)
+###    - 권한 없는 선생님의 타 강의 과제 접근 시도 → 403 에러
+###    - 존재하지 않는 제출물 접근 시도 → 404 에러
+###    - 잘못된 요청 데이터 (빈 피드백, 완료여부 누락) → 400 에러
+###
+### 4. 피드백 제출 후 상태 확인:
+###    - 김선생님 대기 목록: 4개 → 2개로 감소
+###    - 박선생님 대기 목록: 2개 → 1개로 감소
+###    - student_lecture_progress 테이블 업데이트 확인
+###    - teacher_feedback 필드 업데이트 확인
+###
+### 5. 강의별 그룹핑 확인:
+###    - 각 강의별로 과제가 올바르게 그룹핑됨
+###    - 강의 제목, 카테고리, 과제 수 정확히 표시
+###    - 학생명, 유튜브 링크, 제출일시 포함
+###
+### 6. 권한 검증:
+###    - 학생 계정으로 선생님 API 접근 시 403/401
+###    - 잘못된 토큰 사용 시 401
+###    - 인증 헤더 없을 시 401
+###    - 타 선생님의 과제 접근 시 403
+###
+### 7. 응답 구조 검증:
+###    - lectureGroups 배열에 강의별 그룹
+###    - totalPendingCount로 전체 대기 건수
+###    - assignments 배열에 과제 상세 정보
+###    - 유튜브 링크 형식 확인
+###
+### Expected Results:
+### - 피드백 조회: 김선생님 4개, 박선생님 2개 과제 (강의별 그룹핑)
+### - 피드백 제출: 성공적인 피드백 제출 및 진도 업데이트
+### - 피드백 후 조회: 김선생님 2개, 박선생님 1개 과제 (감소 확인)
+### - 권한 검증: 모든 권한 검증 시나리오 정상 동작
+### - 에러 처리: 잘못된 요청에 대한 적절한 에러 응답
+###
+### 테스트 순서:
+### 1-7: 기본 조회 및 권한 테스트
+### 8-14: 피드백 제출 및 에러 케이스 테스트  
+### 15-16: 제출 후 상태 변화 확인
