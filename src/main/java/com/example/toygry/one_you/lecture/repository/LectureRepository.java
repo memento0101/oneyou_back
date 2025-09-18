@@ -182,4 +182,73 @@ public class LectureRepository {
                     .execute();
         }
     }
+
+    // =========================== 비디오 관련 메서드 ===========================
+
+    /**
+     * video 테이블에 새로운 비디오 레코드를 생성합니다.
+     * @param vimeoVideoId Vimeo 비디오 ID
+     * @return 생성된 video 레코드의 UUID
+     */
+    public UUID createVideoRecord(String vimeoVideoId) {
+        UUID videoId = UUID.randomUUID();
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+        // 임시 사용자 ID (실제로는 업로드한 사용자 ID를 받아야 함)
+        UUID uploadedBy = UUID.fromString("5d726309-0785-47e2-8f81-257d74401543");
+
+        dsl.insertInto(VIDEO)
+                .set(VIDEO.ID, videoId)
+                .set(VIDEO.TITLE, "업로드된 비디오") // 기본값, 나중에 업데이트 가능
+                .set(VIDEO.PLATFORM, "VIMEO")
+                .set(VIDEO.EXTERNAL_VIDEO_ID, vimeoVideoId)
+                .set(VIDEO.EMBED_URL, "https://player.vimeo.com/video/" + vimeoVideoId)
+                .set(VIDEO.UPLOAD_STATUS, "READY")
+                .set(VIDEO.IS_LIVE, false)
+                .set(VIDEO.UPLOADED_BY, uploadedBy)
+                .set(VIDEO.CREATED_AT, now)
+                .set(VIDEO.UPDATED_AT, now)
+                .execute();
+
+        return videoId;
+    }
+
+    /**
+     * lecture_content 테이블의 video_id를 업데이트합니다.
+     * @param lectureContentId 강의 콘텐츠 ID (UUID 타입)
+     * @param videoId 비디오 UUID
+     */
+    public void updateLectureContentVideoId(UUID lectureContentId, UUID videoId) {
+        dsl.update(LECTURE_CONTENT)
+                .set(LECTURE_CONTENT.VIDEO_ID, videoId)
+                .set(LECTURE_CONTENT.UPDATED_AT, java.time.LocalDateTime.now())
+                .where(LECTURE_CONTENT.ID.eq(lectureContentId))
+                .execute();
+    }
+
+    /**
+     * 강의 콘텐츠의 Vimeo 비디오 ID를 조회합니다.
+     * @param lectureContentId 강의 콘텐츠 ID
+     * @return Vimeo 비디오 ID (없으면 null)
+     */
+    public String getVimeoVideoId(UUID lectureContentId) {
+        return dsl.select(VIDEO.EXTERNAL_VIDEO_ID)
+                .from(LECTURE_CONTENT)
+                .join(VIDEO).on(LECTURE_CONTENT.VIDEO_ID.eq(VIDEO.ID))
+                .where(LECTURE_CONTENT.ID.eq(lectureContentId)
+                        .and(VIDEO.PLATFORM.eq("VIMEO")))
+                .fetchOne(VIDEO.EXTERNAL_VIDEO_ID);
+    }
+
+    /**
+     * lecture_content에서 video_id 연결을 제거합니다.
+     * @param lectureContentId 강의 콘텐츠 ID
+     */
+    public void removeLectureContentVideoId(UUID lectureContentId) {
+        dsl.update(LECTURE_CONTENT)
+                .setNull(LECTURE_CONTENT.VIDEO_ID)
+                .set(LECTURE_CONTENT.UPDATED_AT, java.time.LocalDateTime.now())
+                .where(LECTURE_CONTENT.ID.eq(lectureContentId))
+                .execute();
+    }
 }

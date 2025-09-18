@@ -39,3 +39,10 @@ jwt:
     converter:
       resource-id: one_you-api
       principal-attribute: preferred_username
+
+# Vimeo Configuration (공통)
+vimeo:
+  access:
+    token: ${VIMEO_ACCESS_TOKEN:your_vimeo_access_token_here}
+  upload:
+    timeout-seconds: 600  # 10분
