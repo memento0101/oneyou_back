@@ -1,0 +1,159 @@
+### Redis-JWT 통합 테스트
+### 작성일: 2025-09-17
+### 설명: Redis 기반 JWT 토큰 관리 시스템 테스트
+
+### 변수 설정
+@baseUrl = http://localhost:8080/api
+@username = test@test.com
+@password = test
+@jwt_token = eyJraWQiOiJjZWNiZjNmNy01MTJhLTQwZTgtYmJkMC05ZTkzYjliNzNmMzYiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ0ZXN0QHRlc3QuY29tIiwicm9sZSI6IlNUVURFTlQiLCJzY29wZSI6IiIsImlzcyI6Im9uZV95b3UiLCJleHAiOjE3NTgwODkxMjIsImlhdCI6MTc1ODA4NTUyMiwidXVpZCI6IjVkNzI2MzA5LTA3ODUtNDdlMi04ZjgxLTI1N2Q3NDQwMTU0MyJ9.XQCmrhTa_qtOXz_CLA_AP3cRvvejOBcCzeZlsQywwF6qp9hSQo22gIoPwE_kRKRgIM_BmgG22qR0JbfpyeEsMibfIwOvv7oWg_sawE2UKQ2TQCpiPCIbgNDYFnW0q5FfP0EHLIf9hle-7wsnoUjZ15Xqpzs40qLwxmd_eQHtjDXlah9JbKW-kCInhRZjZJEglfSuTzwE89LDQNjAqBgs-4Aks2PoywComJyOPyuXGn5y7Gl2FbdqzIiVdPOXvjDy-3hUk6Jgzinaye_SGSHAfH7EacKMzReGw62bN2b5McNgtuJ7uBjxffEvqar27G7LR8K24gxjhRR3O5YaUd4RXA
+
+###############################################
+### 1. 로그인 테스트 (Redis에 토큰 저장 확인)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {%
+client.test("로그인 성공 확인", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.token, "토큰이 존재해야 함");
+    
+    // 토큰을 변수에 저장
+    client.global.set("jwt_token", response.body.data.token);
+    console.log("JWT 토큰:", response.body.data.token);
+});
+%}
+
+###############################################
+### 2. 토큰 검증 테스트 (JWT + Redis 이중 검증)
+GET {{baseUrl}}/auth/token/validate
+Authorization: Bearer {{jwt_token}}
+
+> {%
+client.test("토큰 검증 성공", function() {
+    client.assert(response.status === 200, "응답 코드가 200이어야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.valid === true, "토큰이 유효해야 함");
+    client.assert(response.body.data.username === "test@test.com", "사용자명이 일치해야 함");
+});
+%}
+
+###############################################
+### 3. 다른 보호된 API 테스트 (예: 사용자 목록)
+GET {{baseUrl}}/users
+Authorization: Bearer {{jwt_token}}
+
+> {%
+client.test("보호된 API 접근 성공", function() {
+    client.assert(response.status === 200 || response.status === 403, "인증된 요청이어야 함");
+    // 403이면 권한 문제, 200이면 성공 (둘 다 인증은 통과)
+});
+%}
+
+###############################################
+### 4. 잘못된 토큰으로 테스트
+GET {{baseUrl}}/auth/token/validate
+Authorization: Bearer invalid_token_here
+
+> {%
+client.test("잘못된 토큰 거부", function() {
+    client.assert(response.status === 401, "잘못된 토큰은 401이어야 함");
+});
+%}
+
+###############################################
+### 5. Authorization 헤더 없이 테스트
+GET {{baseUrl}}/auth/token/validate
+
+> {%
+client.test("인증 헤더 없음 거부", function() {
+    client.assert(response.status === 401, "인증 헤더 없으면 401이어야 함");
+});
+%}
+
+###############################################
+### 6. 토큰 갱신 테스트
+POST {{baseUrl}}/auth/refresh
+Authorization: Bearer {{jwt_token}}
+
+> {%
+client.test("토큰 갱신 성공", function() {
+    client.assert(response.status === 200, "토큰 갱신이 성공해야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.token, "새로운 토큰이 존재해야 함");
+    
+    // 새 토큰을 변수에 저장
+    client.global.set("refreshed_token", response.body.data.token);
+    console.log("갱신된 토큰:", response.body.data.token);
+});
+%}
+
+###############################################
+### 7. 갱신된 토큰으로 API 테스트
+GET {{baseUrl}}/auth/token/validate
+Authorization: Bearer {{refreshed_token}}
+
+> {%
+client.test("갱신된 토큰으로 인증 성공", function() {
+    client.assert(response.status === 200, "갱신된 토큰이 유효해야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data.valid === true, "토큰이 유효해야 함");
+});
+%}
+
+###############################################
+### 8. 로그아웃 테스트
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{refreshed_token}}
+
+> {%
+client.test("로그아웃 성공", function() {
+    client.assert(response.status === 200, "로그아웃이 성공해야 함");
+    client.assert(response.body.success === true, "success가 true여야 함");
+    client.assert(response.body.data === "로그아웃되었습니다.", "로그아웃 메시지 확인");
+});
+%}
+
+###############################################
+### 9. 로그아웃 후 토큰 무효화 확인
+GET {{baseUrl}}/auth/token/validate
+Authorization: Bearer {{refreshed_token}}
+
+> {%
+client.test("로그아웃 후 토큰 무효화", function() {
+    client.assert(response.status === 401, "로그아웃 후 토큰은 401이어야 함");
+});
+%}
+
+###############################################
+### Redis CLI에서 확인할 명령어들
+###
+### Redis 접속: docker exec -it redis redis-cli
+### 
+### 1. 저장된 토큰 키 확인:
+###    KEYS jwt:token:*
+###
+### 2. 토큰 내용 확인:
+###    GET "jwt:token:5d726309-0785-47e2-8f81-257d74401543"
+###
+### 3. 토큰 TTL 확인:
+###    TTL "jwt:token:5d726309-0785-47e2-8f81-257d74401543"
+###
+### 4. 토큰 수동 삭제 (로그아웃 시뮬레이션):
+###    DEL "jwt:token:5d726309-0785-47e2-8f81-257d74401543"
+###
+### 5. 삭제 후 위의 "토큰 검증 테스트" 재실행 -> 401 에러 나와야 함
+
+###############################################
+### 테스트 시나리오
+###
+### 1. 위 요청들을 순서대로 실행
+### 2. Redis CLI에서 KEYS jwt:token:* 로 토큰 저장 확인
+### 3. Redis CLI에서 토큰 삭제 후 재테스트
+### 4. 401 에러 확인으로 Redis 통합 검증 완료

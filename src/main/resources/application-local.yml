@@ -37,14 +37,6 @@ springdoc:
   show-actuator: true
 
 # 로깅 설정 - 로컬 개발
-logging:
-  level:
-    root: INFO
-    com.example.toygry.one_you: INFO
-    org.springframework.web: INFO
-    org.springframework.security: INFO
-    org.jooq: INFO
-    org.hibernate.SQL: INFO
 
 # 서버 설정
 server:

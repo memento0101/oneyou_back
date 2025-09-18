@@ -9,6 +9,7 @@ public enum OneYouStatusCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "해당 정보를 찾을 수 없습니다"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다"),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN,"access denied"),
     
     // 사용자 관련 에러
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
@@ -24,7 +25,10 @@ public enum OneYouStatusCode {
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "후기를 찾을 수 없습니다."),
     
     // 공지사항 관련 에러
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "공지사항을 찾을 수 없습니다.");
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "공지사항을 찾을 수 없습니다."),
+
+    // 수강 피드백 관련 에러
+    SUBMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "학생 피드백을 찾을 수 없습니다");
 
     private final HttpStatus httpStatus;
     private final String message;
