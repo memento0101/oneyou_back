@@ -48,6 +48,9 @@ dependencies {
     // Redis 관련 설정
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+    // Vimeo 업로드를 위한 HTTP 클라이언트
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'

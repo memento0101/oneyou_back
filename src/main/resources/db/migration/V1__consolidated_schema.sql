@@ -26,6 +26,11 @@ CREATE TABLE users (
     
     -- 강사 관련 필드 (role='TEACHER'일 때 사용)
     image TEXT,                      -- 강사 프로필 이미지
+    teaching_subjects JSON,          -- 강의 분야 (배열 형태로 저장)
+    bank_name VARCHAR(100),          -- 은행명
+    account_number VARCHAR(50),      -- 계좌번호
+    account_holder VARCHAR(100),     -- 예금주
+    business_number VARCHAR(20),     -- 사업자등록번호
     
     -- 공통 필드
     active BOOLEAN DEFAULT true,     -- 학생/강사 모두 활성화 상태 관리
@@ -40,7 +45,7 @@ CREATE TABLE users (
 
 -- 교사 테이블 제거됨 - users 테이블로 통합
 
--- 교재 테이블 (V2)
+-- 교재 테이블 (V2) - lecture_id 외래키 추가 (1:N 관계)
 CREATE TABLE textbook (
     id UUID PRIMARY KEY,
     name TEXT NOT NULL,
@@ -49,11 +54,12 @@ CREATE TABLE textbook (
     img TEXT,
     link TEXT,
     price INTEGER NOT NULL,
+    lecture_id UUID NOT NULL REFERENCES lecture(id), -- 강의 참조 (한 강의에 여러 교재)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 강의 테이블 (V2) - teacher_id를 user_id로 변경
+-- 강의 테이블 (V2) - teacher_id를 user_id로 변경, textbook_id 제거
 CREATE TABLE lecture (
     id UUID PRIMARY KEY,
     title TEXT NOT NULL,
@@ -61,7 +67,6 @@ CREATE TABLE lecture (
     course TEXT,
     description TEXT,
     price INTEGER NOT NULL,
-    textbook_id UUID REFERENCES textbook(id),
     teacher_id UUID REFERENCES users(id), -- users 테이블 참조 (role='TEACHER')
     period INTEGER,
     target TEXT,
@@ -255,6 +260,19 @@ CREATE TABLE notice (
 );
 
 -- ============================================================================
+-- 대학 정보 테이블 (University)
+-- ============================================================================
+
+CREATE TABLE university (
+    id UUID PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    logo_image TEXT,
+    university_type VARCHAR(20) NOT NULL CHECK (university_type IN ('NATIONAL', 'PRIVATE', 'MEDICAL')),  -- 국립/사립/의과대학 구분
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- ============================================================================
 -- 합격 후기 테이블 (PassReview)
 -- ============================================================================
 
@@ -262,8 +280,19 @@ CREATE TABLE pass_review (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id),
     title VARCHAR(200) NOT NULL,
-    contents TEXT NOT NULL,
-    target_university VARCHAR(100) NOT NULL,
+
+    -- 4개 질문-답변 컬럼
+    academy_selection_reason TEXT NOT NULL,      -- 학원선택이유
+    satisfying_content_reason TEXT NOT NULL,     -- 만족스러웠던 콘텐츠와 이유
+    study_method TEXT NOT NULL,                  -- 학습노하우
+    advice_for_students TEXT NOT NULL,           -- 다른 수강생에게 조언
+
+    -- 대학 정보 (외래키)
+    university_id UUID NOT NULL REFERENCES university(id),
+
+    -- 합격 학과
+    major VARCHAR(100) NOT NULL,
+
     pass_year INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
@@ -372,29 +401,19 @@ VALUES
     ('22222222-2222-2222-2222-222222222222', 'teacher@teacher.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '빵구리', 'https://example.com/teacher/profile.jpg', true, 'TEACHER', now(), now()),
     ('11111111-1111-1111-1111-111111111111', 'teacher2@teacher2.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '정구리', 'image', true, 'TEACHER', now(), now());
 
--- 교재 데이터
-INSERT INTO textbook (id, name, description, description_img, img, link, price, created_at, updated_at)
-VALUES 
-    ('11111111-1111-1111-1111-111111111111', 'EJU 종합 교재', 'EJU 시험 준비를 위한 종합 교재입니다.', 
-     'https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/16620/production/_91408619_55df76d5-2245-41c1-8031-07a4da3f313f.jpg',
-     'https://mblogthumb-phinf.pstatic.net/MjAyMTEwMDVfMjkz/MDAxNjMzNDE5NDM5MzY1.C69FSduuaiTt9LkMykKzsMu2YpWQk50LHninjXFSbNcg.yvzNU4LUEaHd-5VKTgzzfkm8kuXikMnE1VFtm4gj7-Ag.JPEG.parkamsterdam/IMG_3467.JPG?type=w800',
-     'https://www.google.com/url?sa=i&url=https%3A%2F%2Fblog.naver.com%2Fsssss747%2F221675232598%3FviewType%3Dpc&psig=AOvVaw2nB1rY4dZMJGXnog-lwtPL&ust=1749127311911000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCICq9prl140DFQAAAAAdAAAAABAE',
-     25000, now(), now()),
-    ('22222222-1111-1111-1111-111111111111', '물리 강의', '물리 강의 짱', 'image', 'image', 'link', 30000, now(), now()),
-    ('33333333-1111-1111-1111-111111111111', '화학 강의', '화학 강의 짱', 'image', 'image', 'link', 30000, now(), now());
-
 -- 강의 데이터
-INSERT INTO lecture (id, title, category, course, description, price, textbook_id, teacher_id, period, target, image, url, created_at, updated_at)
-VALUES 
-    ('33333333-3333-3333-3333-333333333333', 'EJU 종합 강의', '일본유학', 'EJU', 'EJU 시험 준비를 위한 종합 강의입니다.', 120000, 
-     '11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 30, '일본 유학 준비생',
+INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
+VALUES
+    ('33333333-3333-3333-3333-333333333333', 'EJU 종합 강의', '일본유학', 'EJU', 'EJU 시험 준비를 위한 종합 강의입니다.', 120000,
+     '22222222-2222-2222-2222-222222222222', 30, '일본 유학 준비생',
      'https://www.google.com/url?sa=i&url=https%3A%2F%2Fblog.naver.com%2Fsssss747%2F221675232598%3FviewType%3Dpc&psig=AOvVaw2nB1rY4dZMJGXnog-lwtPL&ust=1749127311911000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCICq9prl140DFQAAAAAdAAAAABAE',
      'https://www.google.com/imgres?q=%ED%8E%98%ED%8E%98%EC%A7%A4&imgurl=https%3A%2F%2Fd2u3dcdbebyaiu.cloudfront.net%2Fuploads%2Fatch_img%2F38%2Fcc5a526bf63046da3ed3123f55f5c1ca_res.jpeg&imgrefurl=https%3A%2F%2Fwww.teamblind.com%2Fkr%2Fpost%2F%25EC%25A0%259C%25EC%259D%25BC-%25EC%25A2%258B%25EC%2595%2584%25ED%2595%2598%25EB%258A%2594-%25ED%258E%2598%25ED%258E%2598-%25EC%25A7%25A4-L75GCCmK&docid=z3qvv46_xmQpHM&tbnid=-WUel9QwIpAQUM&vet=12ahUKEwjw6cCR5deNAxWgVPUHHU-FDWYQM3oECHEQAA..i&w=530&h=492&hcb=2&ved=2ahUKEwjw6cCR5deNAxWgVPUHHU-FDWYQM3oECHEQAA',
      now(), now()),
     ('22222222-1111-1111-1111-111111111111', '물리 강의', '물리', '물리', '물리짱', 150000,
-     '22222222-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 90, '물리바보', 'image', null, DEFAULT, DEFAULT),
+     '11111111-1111-1111-1111-111111111111', 90, '물리바보', 'image', null, DEFAULT, DEFAULT),
     ('33333333-1111-1111-1111-111111111111', '화학 강의', '화학', '화학', '화학짱', 200000,
-     '33333333-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 90, '화학바보', 'image', null, DEFAULT, DEFAULT);
+     '11111111-1111-1111-1111-111111111111', 90, '화학바보', 'image', null, DEFAULT, DEFAULT);
+
 
 -- 비디오 데이터
 INSERT INTO video (id, title, platform, external_video_id, channel_id, embed_url, thumbnail_url, upload_status, is_live, live_status, scheduled_start_time, uploaded_by, created_at, updated_at)
@@ -574,15 +593,15 @@ VALUES
     ('cccccccc-2222-2222-2222-cccccccccccc', 'student3@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '박학생', 'STUDENT', '010-3333-3333', true, NOW(), NOW());
 
 -- 김선생님의 추가 강의
-INSERT INTO lecture (id, title, category, course, description, price, textbook_id, teacher_id, period, target, image, url, created_at, updated_at)
-VALUES 
-    ('dddddddd-1111-1111-1111-dddddddddddd', 'EJU 수학 심화', '수학', '수학', '수학 심화 과정', 180000, '22222222-1111-1111-1111-111111111111', 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 120, '수학 고득점 목표', 'image', null, NOW(), NOW()),
-    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'EJU 종합과목', '종합과목', '종합과목', '종합과목 기초', 160000, '33333333-1111-1111-1111-111111111111', 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 100, '종합과목 기초', 'image', null, NOW(), NOW());
+INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
+VALUES
+    ('dddddddd-1111-1111-1111-dddddddddddd', 'EJU 수학 심화', '수학', '수학', '수학 심화 과정', 180000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 120, '수학 고득점 목표', 'image', null, NOW(), NOW()),
+    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'EJU 종합과목', '종합과목', '종합과목', '종합과목 기초', 160000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 100, '종합과목 기초', 'image', null, NOW(), NOW());
 
 -- 박선생님의 강의
-INSERT INTO lecture (id, title, category, course, description, price, textbook_id, teacher_id, period, target, image, url, created_at, updated_at)
-VALUES 
-    ('ffffffff-1111-1111-1111-ffffffffffff', 'EJU 일본어', '일본어', '일본어', '일본어 기초부터 고급까지', 140000, '22222222-1111-1111-1111-111111111111', 'ffffffff-1111-1111-1111-ffffffffffff', 80, '일본어 초급자', 'image', null, NOW(), NOW());
+INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
+VALUES
+    ('ffffffff-1111-1111-1111-ffffffffffff', 'EJU 일본어', '일본어', '일본어', '일본어 기초부터 고급까지', 140000, 'ffffffff-1111-1111-1111-ffffffffffff', 80, '일본어 초급자', 'image', null, NOW(), NOW());
 
 -- 추가 강의 챕터
 INSERT INTO lecture_chapter (id, lecture_id, title, chapter_order, created_at, updated_at)
@@ -628,3 +647,21 @@ VALUES
     ('aaaaaaaa-6666-6666-6666-aaaaaaaaaaaa', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW()),
     ('bbbbbbbb-6666-6666-6666-bbbbbbbbbbbb', 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'ffffffff-1111-1111-1111-ffffffffffff', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW()),
     ('cccccccc-6666-6666-6666-cccccccccccc', 'cccccccc-2222-2222-2222-cccccccccccc', 'ffffffff-1111-1111-1111-ffffffffffff', '2025-09-01 00:00:00', '2025-12-01 23:59:59', NOW(), NOW());
+
+-- ============================================================================
+-- 교재 데이터 (모든 강의 생성 후)
+-- ============================================================================
+
+-- 교재 데이터
+INSERT INTO textbook (id, name, description, description_img, img, link, price, lecture_id, created_at, updated_at)
+VALUES
+    ('11111111-1111-1111-1111-111111111111', 'EJU 종합 교재', 'EJU 시험 준비를 위한 종합 교재입니다.',
+     'https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/16620/production/_91408619_55df76d5-2245-41c1-8031-07a4da3f313f.jpg',
+     'https://mblogthumb-phinf.pstatic.net/MjAyMTEwMDVfMjkz/MDAxNjMzNDE5NDM5MzY1.C69FSduuaiTt9LkMykKzsMu2YpWQk50LHninjXFSbNcg.yvzNU4LUEaHd-5VKTgzzfkm8kuXikMnE1VFtm4gj7-Ag.JPEG.parkamsterdam/IMG_3467.JPG?type=w800',
+     'https://www.google.com/url?sa=i&url=https%3A%2F%2Fblog.naver.com%2Fsssss747%2F221675232598%3FviewType%3Dpc&psig=AOvVaw2nB1rY4dZMJGXnog-lwtPL&ust=1749127311911000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCICq9prl140DFQAAAAAdAAAAABAE',
+     25000, '33333333-3333-3333-3333-333333333333', now(), now()),
+    ('22222222-1111-1111-1111-111111111111', '물리 교재', '물리 교재 짱', 'image', 'image', 'link', 30000, '22222222-1111-1111-1111-111111111111', now(), now()),
+    ('33333333-1111-1111-1111-111111111111', '화학 교재', '화학 교재 짱', 'image', 'image', 'link', 30000, '33333333-1111-1111-1111-111111111111', now(), now()),
+    ('dddddddd-1111-1111-1111-111111111111', 'EJU 수학 심화 교재', '수학 심화 과정을 위한 전문 교재', 'image', 'image', 'link', 40000, 'dddddddd-1111-1111-1111-dddddddddddd', now(), now()),
+    ('eeeeeeee-1111-1111-1111-111111111111', 'EJU 종합과목 교재', '종합과목 기초 교재', 'image', 'image', 'link', 35000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', now(), now()),
+    ('ffffffff-1111-1111-1111-111111111111', 'EJU 일본어 교재', '일본어 기초부터 고급까지', 'image', 'image', 'link', 32000, 'ffffffff-1111-1111-1111-ffffffffffff', now(), now());

@@ -52,10 +52,19 @@ public class UsersService {
                         new TypeReference<UserResponse.EjuScores>() {});
             }
 
+            // teaching_subjects null 체크
+            List<String> teachingSubjects = null;
+            if (user.getTeachingSubjects() != null) {
+                teachingSubjects = objectmapper.readValue(
+                        user.getTeachingSubjects().data(),
+                        new TypeReference<List<String>>() {});
+            }
+
             return new UserResponse(
                     user.getId(),
                     user.getUserId(),
                     user.getName(),
+                    // 학생 관련 필드
                     user.getStudentContact(),
                     user.getParentContact(),
                     user.getAddress(),
@@ -64,6 +73,15 @@ public class UsersService {
                     user.getMajorType(),
                     eju,
                     user.getNote(),
+                    // 선생님 관련 필드
+                    user.getImage(),
+                    teachingSubjects,
+                    user.getBankName(),
+                    user.getAccountNumber(),
+                    user.getAccountHolder(),
+                    user.getBusinessNumber(),
+                    // 공통 필드
+                    user.getActive(),
                     user.getCreatedAt(),
                     user.getUpdatedAt(),
                     user.getRole()

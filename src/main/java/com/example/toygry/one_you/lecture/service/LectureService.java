@@ -6,8 +6,11 @@ import com.example.toygry.one_you.jooq.generated.tables.records.*;
 import com.example.toygry.one_you.lecture.dto.*;
 import com.example.toygry.one_you.lecture.repository.LectureRepository;
 import com.example.toygry.one_you.lecture.repository.StudentLectureRepository;
+import com.example.toygry.one_you.video.dto.VideoUploadResponse;
+import com.example.toygry.one_you.video.service.VimeoUploadService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -19,6 +22,7 @@ public class LectureService {
 
     private final LectureRepository lectureRepository;
     private final StudentLectureRepository studentLectureRepository;
+    private final VimeoUploadService vimeoUploadService;
 
     public LectureDetailResponse getLectureDetail(UUID userId, UUID lectureId) {
         LocalDateTime expireDate = studentLectureRepository.findLectureExpireDate(userId, lectureId);
@@ -186,5 +190,111 @@ public class LectureService {
         lectureRepository.insertOrUpdateLectureProgress(userId, request.lectureDetailId(), request.isCompleted());
 
         return request.isCompleted() ? "강의가 완료로 표시되었습니다." : "강의 완료가 취소되었습니다.";
+    }
+
+    // =========================== 비디오 관련 메서드 ===========================
+
+    /**
+     * 강의 콘텐츠에 비디오 ID를 저장합니다.
+     * @param lectureContentId 강의 콘텐츠 ID
+     * @param vimeoVideoId Vimeo 비디오 ID
+     */
+    public void updateVideoId(UUID lectureContentId, String vimeoVideoId) {
+        // 먼저 video 테이블에 레코드 생성
+        UUID videoId = lectureRepository.createVideoRecord(vimeoVideoId);
+
+        // lecture_content 테이블에 video_id 업데이트
+        lectureRepository.updateLectureContentVideoId(lectureContentId, videoId);
+    }
+
+    /**
+     * 강의 콘텐츠의 비디오 ID를 조회합니다.
+     * @param lectureContentId 강의 콘텐츠 ID
+     * @return Vimeo 비디오 ID (없으면 null)
+     */
+    public String getVideoId(UUID lectureContentId) {
+        return lectureRepository.getVimeoVideoId(lectureContentId);
+    }
+
+    /**
+     * 강의 콘텐츠에서 비디오 연결을 제거합니다.
+     * @param lectureContentId 강의 콘텐츠 ID
+     */
+    public void removeVideoId(UUID lectureContentId) {
+        lectureRepository.removeLectureContentVideoId(lectureContentId);
+    }
+
+    /**
+     * Vimeo에 비디오를 업로드하고 강의 콘텐츠와 연결합니다.
+     * @param lectureContentId 강의 콘텐츠 ID
+     * @param videoFile 업로드할 비디오 파일
+     * @param uploaderId 업로드하는 사용자 ID
+     * @return 업로드 결과 응답
+     */
+    public VideoUploadResponse uploadVideoToVimeo(UUID lectureContentId, MultipartFile videoFile, UUID uploaderId) {
+        // 파일 유효성 검사
+        validateVideoFile(videoFile);
+
+        try {
+            // Vimeo에 비디오 업로드
+            String vimeoVideoId = vimeoUploadService.uploadVideo(videoFile);
+
+            // 강의 콘텐츠에 비디오 ID 저장
+            updateVideoId(lectureContentId, vimeoVideoId);
+
+            return VideoUploadResponse.builder()
+                    .lectureContentId(lectureContentId)
+                    .vimeoVideoId(vimeoVideoId)
+                    .fileName(videoFile.getOriginalFilename())
+                    .fileSize(videoFile.getSize())
+                    .message("비디오 업로드가 완료되었습니다.")
+                    .build();
+
+        } catch (Exception e) {
+            throw new BaseException(OneYouStatusCode.INTERNAL_SERVER_ERROR,
+                    "비디오 업로드에 실패했습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 강의 콘텐츠의 비디오 정보를 조회합니다.
+     * @param lectureContentId 강의 콘텐츠 ID
+     * @return 비디오 정보 응답
+     */
+    public VideoUploadResponse getVideoInfo(UUID lectureContentId) {
+        String vimeoVideoId = getVideoId(lectureContentId);
+
+        if (vimeoVideoId == null || vimeoVideoId.isEmpty()) {
+            return VideoUploadResponse.builder()
+                    .lectureContentId(lectureContentId)
+                    .message("업로드된 비디오가 없습니다.")
+                    .build();
+        }
+
+        return VideoUploadResponse.builder()
+                .lectureContentId(lectureContentId)
+                .vimeoVideoId(vimeoVideoId)
+                .message("비디오 정보 조회 완료")
+                .build();
+    }
+
+    /**
+     * 비디오 파일 유효성을 검사합니다.
+     * @param videoFile 검사할 비디오 파일
+     */
+    private void validateVideoFile(MultipartFile videoFile) {
+        if (videoFile.isEmpty()) {
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST, "비디오 파일이 선택되지 않았습니다.");
+        }
+
+        String contentType = videoFile.getContentType();
+        if (contentType == null || !contentType.startsWith("video/")) {
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST, "비디오 파일만 업로드 가능합니다.");
+        }
+
+        long maxSize = 1024 * 1024 * 1024L; // 1GB
+        if (videoFile.getSize() > maxSize) {
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST, "파일 크기는 1GB를 초과할 수 없습니다.");
+        }
     }
 }
