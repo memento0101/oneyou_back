@@ -5,7 +5,7 @@ import com.example.toygry.one_you.config.security.UserTokenPrincipal;
 import com.example.toygry.one_you.users.dto.UserResponse;
 import com.example.toygry.one_you.users.service.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UsersController {
 
     private final UsersService usersService;

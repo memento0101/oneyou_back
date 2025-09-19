@@ -20,11 +20,14 @@ public record LectureContentsResponse(
         String teacherFeedback,
 
         // 퀴즈 전용
-        List<QuizWithOptions> quizzes
+        List<QuizWithOptions> quizzes,
+
+        // 첨부파일 (모든 타입 공통)
+        List<LectureAttachmentResponse> attachments
 ) {
 
     // 비디오 강의 응답 생성
-    public static LectureContentsResponse ofVideo(LectureDetailRecord detail, LectureContentRecord content, VideoRecord video, StudentReviewSubmissionRecord submission) {
+    public static LectureContentsResponse ofVideo(LectureDetailRecord detail, LectureContentRecord content, VideoRecord video, StudentReviewSubmissionRecord submission, List<LectureAttachmentResponse> attachments) {
         return new LectureContentsResponse(
                 detail.getId(),
                 detail.getTitle(),
@@ -33,12 +36,13 @@ public record LectureContentsResponse(
                 content.getContents(),
                 submission != null ? submission.getReviewUrl() : null,
                 submission != null ? submission.getTeacherFeedback() : null,
-                null
+                null,
+                attachments
         );
     }
 
     // 라이브 강의 응답 생성
-    public static LectureContentsResponse ofLive(LectureDetailRecord detail, LectureContentRecord content, VideoRecord video) {
+    public static LectureContentsResponse ofLive(LectureDetailRecord detail, LectureContentRecord content, VideoRecord video, List<LectureAttachmentResponse> attachments) {
         return new LectureContentsResponse(
                 detail.getId(),
                 detail.getTitle(),
@@ -47,12 +51,13 @@ public record LectureContentsResponse(
                 content.getContents(),
                 null,
                 null,
-                null
+                null,
+                attachments
         );
     }
 
     // 퀴즈 응답 생성
-    public static LectureContentsResponse ofQuiz(LectureDetailRecord detail, List<QuizWithOptions> quizzes) {
+    public static LectureContentsResponse ofQuiz(LectureDetailRecord detail, List<QuizWithOptions> quizzes, List<LectureAttachmentResponse> attachments) {
         return new LectureContentsResponse(
                 detail.getId(),
                 detail.getTitle(),
@@ -61,7 +66,8 @@ public record LectureContentsResponse(
                 null,
                 null,
                 null,
-                quizzes
+                quizzes,
+                attachments
         );
     }
 
