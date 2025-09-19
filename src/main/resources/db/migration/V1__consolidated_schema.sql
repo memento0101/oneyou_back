@@ -147,6 +147,22 @@ CREATE TABLE lecture_content (
     updated_at TIMESTAMP DEFAULT now()
 );
 
+-- 강의 첨부파일
+CREATE TABLE lecture_attachment (
+    id UUID PRIMARY KEY,
+    lecture_detail_id UUID NOT NULL REFERENCES lecture_detail(id),
+    file_name VARCHAR(255) NOT NULL,
+    original_file_name VARCHAR(255) NOT NULL,
+    file_path TEXT NOT NULL,
+    file_size BIGINT,
+    file_type VARCHAR(100),
+    mime_type VARCHAR(100),
+    description TEXT,
+    download_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
 -- 강의 퀴즈
 CREATE TABLE lecture_quiz (
     id UUID PRIMARY KEY,
@@ -355,6 +371,11 @@ CREATE INDEX idx_lecture_question_answered ON lecture_question(is_answered);
 CREATE INDEX idx_lecture_question_created_at ON lecture_question(created_at DESC);
 CREATE INDEX idx_lecture_question_answer_question_id ON lecture_question_answer(question_id);
 CREATE INDEX idx_lecture_question_answer_teacher_id ON lecture_question_answer(teacher_id);
+
+-- 강의 첨부파일 인덱스
+CREATE INDEX idx_lecture_attachment_lecture_detail_id ON lecture_attachment(lecture_detail_id);
+CREATE INDEX idx_lecture_attachment_file_type ON lecture_attachment(file_type);
+CREATE INDEX idx_lecture_attachment_created_at ON lecture_attachment(created_at DESC);
 
 -- ============================================================================
 -- 초기 샘플 데이터
@@ -665,3 +686,28 @@ VALUES
     ('dddddddd-1111-1111-1111-111111111111', 'EJU 수학 심화 교재', '수학 심화 과정을 위한 전문 교재', 'image', 'image', 'link', 40000, 'dddddddd-1111-1111-1111-dddddddddddd', now(), now()),
     ('eeeeeeee-1111-1111-1111-111111111111', 'EJU 종합과목 교재', '종합과목 기초 교재', 'image', 'image', 'link', 35000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', now(), now()),
     ('ffffffff-1111-1111-1111-111111111111', 'EJU 일본어 교재', '일본어 기초부터 고급까지', 'image', 'image', 'link', 32000, 'ffffffff-1111-1111-1111-ffffffffffff', now(), now());
+
+-- ============================================================================
+-- 강의 첨부파일 샘플 데이터
+-- ============================================================================
+
+-- 첨부파일 데이터
+INSERT INTO lecture_attachment (id, lecture_detail_id, file_name, original_file_name, file_path, file_size, file_type, mime_type, description, download_count, created_at, updated_at)
+VALUES
+    -- 가속도 운동 강의 첨부파일
+    ('11111111-aaaa-aaaa-aaaa-111111111111', '55555555-5555-5555-5555-555555555555', 'acceleration_notes_20250919.pdf', '가속도 운동 정리노트.pdf', '/uploads/lecture/acceleration_notes_20250919.pdf', 2048576, 'PDF', 'application/pdf', '가속도 운동 핵심 정리', 15, NOW(), NOW()),
+    ('22222222-aaaa-aaaa-aaaa-222222222222', '55555555-5555-5555-5555-555555555555', 'physics_formulas.xlsx', '물리 공식 정리.xlsx', '/uploads/lecture/physics_formulas.xlsx', 512000, 'EXCEL', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '물리 공식 정리표', 8, NOW(), NOW()),
+
+    -- 원운동 강의 첨부파일
+    ('33333333-aaaa-aaaa-aaaa-333333333333', '66666666-6666-6666-6666-666666666666', 'circular_motion_examples.pdf', '원운동 예제 모음.pdf', '/uploads/lecture/circular_motion_examples.pdf', 3145728, 'PDF', 'application/pdf', '원운동 문제 풀이', 22, NOW(), NOW()),
+
+    -- 미분의 기본 개념 강의 첨부파일
+    ('dddddddd-aaaa-aaaa-aaaa-dddddddddddd', 'dddddddd-3333-3333-3333-dddddddddddd', 'calculus_basics.pdf', '미분 기초 개념.pdf', '/uploads/lecture/calculus_basics.pdf', 1572864, 'PDF', 'application/pdf', '미분의 기본 개념과 공식', 12, NOW(), NOW()),
+    ('eeeeeeee-aaaa-aaaa-aaaa-eeeeeeeeeeee', 'dddddddd-3333-3333-3333-dddddddddddd', 'derivative_practice.docx', '미분 연습문제.docx', '/uploads/lecture/derivative_practice.docx', 256000, 'WORD', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '미분 연습 문제집', 5, NOW(), NOW()),
+
+    -- 메이지 유신 강의 첨부파일
+    ('ffffffff-aaaa-aaaa-aaaa-ffffffffffff', 'ffffffff-3333-3333-3333-ffffffffffff', 'meiji_restoration_timeline.pdf', '메이지 유신 연표.pdf', '/uploads/lecture/meiji_restoration_timeline.pdf', 2097152, 'PDF', 'application/pdf', '메이지 유신 시대 연표', 18, NOW(), NOW()),
+
+    -- 조사와 조동사 강의 첨부파일
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'japanese_grammar_guide.pdf', '일본어 조사 조동사 정리.pdf', '/uploads/lecture/japanese_grammar_guide.pdf', 1048576, 'PDF', 'application/pdf', '조사와 조동사 완벽 정리', 25, NOW(), NOW()),
+    ('bbbbbbbb-aaaa-aaaa-aaaa-bbbbbbbbbbbb', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'grammar_exercises.zip', '문법 연습 파일.zip', '/uploads/lecture/grammar_exercises.zip', 4194304, 'ZIP', 'application/zip', '문법 연습 파일 모음', 7, NOW(), NOW());

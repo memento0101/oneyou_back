@@ -4,6 +4,7 @@ import com.example.toygry.one_you.common.exception.BaseException;
 import com.example.toygry.one_you.common.exception.OneYouStatusCode;
 import com.example.toygry.one_you.jooq.generated.tables.records.*;
 import com.example.toygry.one_you.lecture.dto.*;
+import com.example.toygry.one_you.lecture.repository.LectureAttachmentRepository;
 import com.example.toygry.one_you.lecture.repository.LectureRepository;
 import com.example.toygry.one_you.lecture.repository.StudentLectureRepository;
 import com.example.toygry.one_you.video.dto.VideoUploadResponse;
@@ -22,6 +23,7 @@ public class LectureService {
 
     private final LectureRepository lectureRepository;
     private final StudentLectureRepository studentLectureRepository;
+    private final LectureAttachmentRepository lectureAttachmentRepository;
     private final VimeoUploadService vimeoUploadService;
 
     public LectureDetailResponse getLectureDetail(UUID userId, UUID lectureId) {
@@ -61,6 +63,10 @@ public class LectureService {
             throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND);
         }
 
+        // 첨부파일 조회 (모든 타입 공통)
+        List<LectureAttachmentResponse> attachments = lectureAttachmentRepository
+                .findAttachmentsByLectureDetailId(request.lectureDetailId());
+
         if ("QUIZ".equalsIgnoreCase(request.type())) {
             List<LectureQuizRecord> quizList = lectureRepository.fetchLectureQuizzes(request.lectureDetailId());
             if (quizList.isEmpty()) {
@@ -73,7 +79,7 @@ public class LectureService {
                 return LectureContentsResponse.QuizWithOptions.from(quiz, options);
             }).toList();
 
-            return LectureContentsResponse.ofQuiz(detail, quizResponses);
+            return LectureContentsResponse.ofQuiz(detail, quizResponses, attachments);
         }
         LectureContentRecord content = lectureRepository.fetchLectureContent(request.lectureDetailId());
         if (content == null) {
@@ -86,13 +92,13 @@ public class LectureService {
                     .fetchStudentReviewSubmission(request.lectureDetailId(), userId);
             // 비디오 정보 조회
             VideoRecord video = lectureRepository.fetchVideoByContentId(request.lectureDetailId());
-            return LectureContentsResponse.ofVideo(detail, content, video, submission);
+            return LectureContentsResponse.ofVideo(detail, content, video, submission, attachments);
         }
 
         if ("LIVE".equalsIgnoreCase(request.type())) {
             // 라이브 비디오 정보 조회
             VideoRecord video = lectureRepository.fetchVideoByContentId(request.lectureDetailId());
-            return LectureContentsResponse.ofLive(detail, content, video);
+            return LectureContentsResponse.ofLive(detail, content, video, attachments);
         }
 
         throw new BaseException(OneYouStatusCode.BAD_REQUEST, "알 수 없는 강의 유형입니다.");
