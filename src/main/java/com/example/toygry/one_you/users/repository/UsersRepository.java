@@ -74,7 +74,14 @@ public class UsersRepository {
                 .set(USERS.PASSWORD, passwordEncoder.encode(request.password()))
                 .set(USERS.NAME, request.name())
                 .set(USERS.IMAGE, request.image())
+                .set(USERS.TEACHING_SUBJECTS, request.teachingSubjects() != null ?
+                    JSON.valueOf(toJson(request.teachingSubjects())) : null)
+                .set(USERS.BANK_NAME, request.bankName())
+                .set(USERS.ACCOUNT_NUMBER, request.accountNumber())
+                .set(USERS.ACCOUNT_HOLDER, request.accountHolder())
+                .set(USERS.BUSINESS_NUMBER, request.businessNumber())
                 .set(USERS.ROLE, "TEACHER")
+                .set(USERS.ACTIVE, true)
                 .set(USERS.CREATED_AT, LocalDateTime.now())
                 .set(USERS.UPDATED_AT, LocalDateTime.now())
                 .execute();

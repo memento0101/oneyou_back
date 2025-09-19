@@ -29,7 +29,14 @@ public enum OneYouStatusCode {
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, "공지사항을 찾을 수 없습니다."),
 
     // 수강 피드백 관련 에러
-    SUBMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "학생 피드백을 찾을 수 없습니다");
+    SUBMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "학생 피드백을 찾을 수 없습니다"),
+
+    // 대학 관련 에러
+    UNIVERSITY_NOT_FOUND(HttpStatus.NOT_FOUND, "대학을 찾을 수 없습니다."),
+    UNIVERSITY_TYPE_INVALID(HttpStatus.BAD_REQUEST, "유효하지 않은 대학 타입입니다."),
+
+    // 합격 후기 관련 에러
+    PASS_REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "합격 후기를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
