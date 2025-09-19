@@ -9,6 +9,7 @@ public record UserResponse(
         UUID id,
         String userId,
         String name,
+        // 학생 관련 필드
         String studentContact,
         String parentContact,
         String address,
@@ -17,6 +18,15 @@ public record UserResponse(
         String majorType,
         EjuScores ejuScores,
         String note,
+        // 선생님 관련 필드
+        String image,
+        List<String> teachingSubjects,
+        String bankName,
+        String accountNumber,
+        String accountHolder,
+        String businessNumber,
+        // 공통 필드
+        Boolean active,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         String role
