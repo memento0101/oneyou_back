@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +31,7 @@ import java.security.interfaces.RSAPublicKey;
 
 
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -49,12 +51,12 @@ public class SecurityConfig {
                     )
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/.well-known/jwks.json", "/ws-chat/**", "/chat/**").permitAll() // context-path 고려하여 /api 제거
+                        .requestMatchers("/auth/login", "/auth/register", "/.well-known/jwks.json", "/ws-chat/**", "/chat/**").permitAll() // 일반 로그인/회원가입만 허용
                         // Swagger UI 및 OpenAPI 문서 접근 허용
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs", "/v3/api-docs.yaml", "/swagger-resources/**", "/webjars/**").permitAll()
                         // Teacher 전용 API는 TEACHER 권한 필요
                         .requestMatchers("/teacher/**").hasAuthority("ROLE_TEACHER")
-                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
+                        .anyRequest().authenticated() // 나머지 요청은 인증 필요 (선생님 등록 포함)
                 )
                 // JWT 커스텀 필터 추가 (순환참조 방지를 위해 직접 생성)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtDecoder()), UsernamePasswordAuthenticationFilter.class);

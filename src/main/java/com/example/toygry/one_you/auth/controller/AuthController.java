@@ -11,6 +11,7 @@ import com.example.toygry.one_you.users.dto.UserInsertRequest;
 import com.example.toygry.one_you.users.service.UsersService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -99,6 +100,8 @@ public class AuthController {
     }
 
     @PostMapping("/register/teacher")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
+    @Operation(summary = "선생님 계정 생성", description = "ADMIN 또는 TEACHER 권한이 있는 사용자만 선생님 계정을 생성할 수 있습니다.")
     public ApiResponse<String> insertTeacher(@RequestBody TeacherInsertRequest request) {
         usersService.insertTeacher(request);
         return ApiResponse.success("선생님 계정 생성이 완료되었습니다");
