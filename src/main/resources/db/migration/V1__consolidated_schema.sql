@@ -389,7 +389,7 @@ INSERT INTO users (
 ) VALUES (
     '5d726309-0785-47e2-8f81-257d74401543',
     'test@test.com',
-    '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO',
+    '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW',
     '홍길동',
     '010-1234-5678',
     '010-1111-2222',
@@ -419,8 +419,8 @@ INSERT INTO users (
 -- 강사 데이터
 INSERT INTO users (id, user_id, password, name, image, active, role, created_at, updated_at)
 VALUES 
-    ('22222222-2222-2222-2222-222222222222', 'teacher@teacher.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '빵구리', 'https://example.com/teacher/profile.jpg', true, 'TEACHER', now(), now()),
-    ('11111111-1111-1111-1111-111111111111', 'teacher2@teacher2.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '정구리', 'image', true, 'TEACHER', now(), now());
+    ('22222222-2222-2222-2222-222222222222', 'teacher@teacher.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '빵구리', 'https://example.com/teacher/profile.jpg', true, 'TEACHER', now(), now()),
+    ('11111111-1111-1111-1111-111111111111', 'teacher2@teacher2.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '정구리', 'image', true, 'TEACHER', now(), now());
 
 -- 강의 데이터
 INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
@@ -603,15 +603,15 @@ EJU에서는 주로 내적이 출제되니 내적 위주로 연습하세요!', '
 -- 추가 선생님 계정 (기존에 22222222-2222-2222-2222-222222222222가 있으므로 다른 ID 사용)
 INSERT INTO users (id, user_id, password, name, role, active, created_at, updated_at)
 VALUES 
-    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'teacher1@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '뿡구리', 'TEACHER', true, NOW(), NOW()),
-    ('ffffffff-1111-1111-1111-ffffffffffff', 'teacher2@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '짱구리', 'TEACHER', true, NOW(), NOW());
+    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'teacher1@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '뿡구리', 'TEACHER', true, NOW(), NOW()),
+    ('ffffffff-1111-1111-1111-ffffffffffff', 'teacher2@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '짱구리', 'TEACHER', true, NOW(), NOW());
 
 -- 추가 학생 계정
 INSERT INTO users (id, user_id, password, name, role, student_contact, active, created_at, updated_at)
 VALUES 
-    ('aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'student1@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '김학생', 'STUDENT', '010-1111-1111', true, NOW(), NOW()),
-    ('bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'student2@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '이학생', 'STUDENT', '010-2222-2222', true, NOW(), NOW()),
-    ('cccccccc-2222-2222-2222-cccccccccccc', 'student3@test.com', '$2a$10$bm0E.N10OLa0NDBSCxYhZeoLo5VSPxnCSN9nWWQRlPOP9V1CFtpRO', '박학생', 'STUDENT', '010-3333-3333', true, NOW(), NOW());
+    ('aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'student1@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '김학생', 'STUDENT', '010-1111-1111', true, NOW(), NOW()),
+    ('bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'student2@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '이학생', 'STUDENT', '010-2222-2222', true, NOW(), NOW()),
+    ('cccccccc-2222-2222-2222-cccccccccccc', 'student3@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '박학생', 'STUDENT', '010-3333-3333', true, NOW(), NOW());
 
 -- 김선생님의 추가 강의
 INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
