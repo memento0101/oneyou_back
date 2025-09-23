@@ -13,7 +13,7 @@ CREATE TABLE users (
     user_id VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(100) NOT NULL,
-    
+
     -- 학생 관련 필드 (role='STUDENT'일 때 사용)
     student_contact VARCHAR(20),
     parent_contact VARCHAR(20),
@@ -23,7 +23,7 @@ CREATE TABLE users (
     major_type VARCHAR(10),           -- 예: "문과", "이과"
     eju_scores JSON,                 -- 강사는 NULL 허용
     note TEXT,
-    
+
     -- 강사 관련 필드 (role='TEACHER'일 때 사용)
     image TEXT,                      -- 강사 프로필 이미지
     teaching_subjects JSON,          -- 강의 분야 (배열 형태로 저장)
@@ -31,7 +31,7 @@ CREATE TABLE users (
     account_number VARCHAR(50),      -- 계좌번호
     account_holder VARCHAR(100),     -- 예금주
     business_number VARCHAR(20),     -- 사업자등록번호
-    
+
     -- 공통 필드
     active BOOLEAN DEFAULT true,     -- 학생/강사 모두 활성화 상태 관리
     role VARCHAR(50) DEFAULT 'STUDENT',
@@ -63,6 +63,7 @@ CREATE TABLE textbook (
 CREATE TABLE lecture (
     id UUID PRIMARY KEY,
     title TEXT NOT NULL,
+    subtitle TEXT, -- 강의 부제목
     category TEXT,
     course TEXT,
     description TEXT,
@@ -85,29 +86,29 @@ CREATE TABLE video (
     -- 기본 정보
     id UUID PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
-    
+
     -- 플랫폼 및 ID
     platform VARCHAR(20) NOT NULL CHECK (platform IN ('VIMEO', 'YOUTUBE_LIVE')),
     external_video_id VARCHAR(255) NOT NULL, -- Vimeo ID 또는 YouTube Video ID
     channel_id VARCHAR(255), -- YouTube Live용 (Vimeo는 NULL)
-    
+
     -- 임베드 URL
     embed_url TEXT NOT NULL, -- iframe src에 사용할 URL
     thumbnail_url TEXT,
-    
+
     -- 업로드 상태
     upload_status VARCHAR(20) DEFAULT 'READY' CHECK (upload_status IN ('UPLOADING', 'PROCESSING', 'READY', 'FAILED')),
-    
+
     -- 라이브 관련 (YouTube Live만 사용)
     is_live BOOLEAN DEFAULT false,
     live_status VARCHAR(20) CHECK (live_status IN ('SCHEDULED', 'LIVE', 'ENDED')),
     scheduled_start_time TIMESTAMP,
-    
+
     -- 관리 정보
     uploaded_by UUID NOT NULL REFERENCES users(id),
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now(),
-    
+
     -- 중복 방지
     UNIQUE(platform, external_video_id)
 );
@@ -240,7 +241,8 @@ CREATE TABLE lecture_review (
     is_anonymous BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now(),
-    
+
+
     -- 한 유저당 동일 강의에 대해 하나의 후기만 작성 가능
     UNIQUE (user_id, lecture_id)
 );
@@ -338,7 +340,7 @@ CREATE TABLE lecture_question_answer (
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now(),
-    
+
     -- 하나의 질문에 대해 하나의 답변만 (선생님이 답변 수정 가능)
     UNIQUE (question_id)
 );
@@ -418,35 +420,35 @@ INSERT INTO users (
 
 -- 강사 데이터
 INSERT INTO users (id, user_id, password, name, image, active, role, created_at, updated_at)
-VALUES 
+VALUES
     ('22222222-2222-2222-2222-222222222222', 'teacher@teacher.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '빵구리', 'https://example.com/teacher/profile.jpg', true, 'TEACHER', now(), now()),
     ('11111111-1111-1111-1111-111111111111', 'teacher2@teacher2.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '정구리', 'image', true, 'TEACHER', now(), now());
 
 -- 강의 데이터
-INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
+INSERT INTO lecture (id, title, subtitle, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
 VALUES
-    ('33333333-3333-3333-3333-333333333333', 'EJU 종합 강의', '일본유학', 'EJU', 'EJU 시험 준비를 위한 종합 강의입니다.', 120000,
+    ('33333333-3333-3333-3333-333333333333', 'EJU 종합 강의', '일본유학의 첫걸음을 함께해요', '일본유학', 'EJU', 'EJU 시험 준비를 위한 종합 강의입니다.', 120000,
      '22222222-2222-2222-2222-222222222222', 30, '일본 유학 준비생',
      'https://www.google.com/url?sa=i&url=https%3A%2F%2Fblog.naver.com%2Fsssss747%2F221675232598%3FviewType%3Dpc&psig=AOvVaw2nB1rY4dZMJGXnog-lwtPL&ust=1749127311911000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCICq9prl140DFQAAAAAdAAAAABAE',
      'https://www.google.com/imgres?q=%ED%8E%98%ED%8E%98%EC%A7%A4&imgurl=https%3A%2F%2Fd2u3dcdbebyaiu.cloudfront.net%2Fuploads%2Fatch_img%2F38%2Fcc5a526bf63046da3ed3123f55f5c1ca_res.jpeg&imgrefurl=https%3A%2F%2Fwww.teamblind.com%2Fkr%2Fpost%2F%25EC%25A0%259C%25EC%259D%25BC-%25EC%25A2%258B%25EC%2595%2584%25ED%2595%2598%25EB%258A%2594-%25ED%258E%2598%25ED%258E%2598-%25EC%25A7%25A4-L75GCCmK&docid=z3qvv46_xmQpHM&tbnid=-WUel9QwIpAQUM&vet=12ahUKEwjw6cCR5deNAxWgVPUHHU-FDWYQM3oECHEQAA..i&w=530&h=492&hcb=2&ved=2ahUKEwjw6cCR5deNAxWgVPUHHU-FDWYQM3oECHEQAA',
      now(), now()),
-    ('22222222-1111-1111-1111-111111111111', '물리 강의', '물리', '물리', '물리짱', 150000,
+    ('22222222-1111-1111-1111-111111111111', '물리 강의', '기초부터 심화까지 완전정복', '물리', '물리', '물리짱', 150000,
      '11111111-1111-1111-1111-111111111111', 90, '물리바보', 'image', null, DEFAULT, DEFAULT),
-    ('33333333-1111-1111-1111-111111111111', '화학 강의', '화학', '화학', '화학짱', 200000,
+    ('33333333-1111-1111-1111-111111111111', '화학 강의', '실험과 이론의 완벽 조화', '화학', '화학', '화학짱', 200000,
      '11111111-1111-1111-1111-111111111111', 90, '화학바보', 'image', null, DEFAULT, DEFAULT);
 
 
 -- 비디오 데이터
 INSERT INTO video (id, title, platform, external_video_id, channel_id, embed_url, thumbnail_url, upload_status, is_live, live_status, scheduled_start_time, uploaded_by, created_at, updated_at)
-VALUES 
+VALUES
     -- Vimeo 샘플 (VIDEO 타입용)
-    ('11111111-1111-1111-1111-111111111111', '물리학 1강 - 가속도 운동', 'VIMEO', '123456789', NULL, 
-     'https://player.vimeo.com/video/123456789', 'https://i.vimeocdn.com/video/123456789.jpg', 'READY', 
+    ('11111111-1111-1111-1111-111111111111', '물리학 1강 - 가속도 운동', 'VIMEO', '123456789', NULL,
+     'https://player.vimeo.com/video/123456789', 'https://i.vimeocdn.com/video/123456789.jpg', 'READY',
      false, NULL, NULL, '5d726309-0785-47e2-8f81-257d74401543', NOW(), NOW()),
-     
+
     -- YouTube Live 샘플 (LIVE 타입용)
-    ('22222222-2222-2222-2222-222222222222', '물리학 라이브 수업 - 원운동', 'YOUTUBE_LIVE', 'dQw4w9WgXcQ', 'UCChannelId123', 
-     'https://www.youtube.com/embed/dQw4w9WgXcQ', 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', 'READY', 
+    ('22222222-2222-2222-2222-222222222222', '물리학 라이브 수업 - 원운동', 'YOUTUBE_LIVE', 'dQw4w9WgXcQ', 'UCChannelId123',
+     'https://www.youtube.com/embed/dQw4w9WgXcQ', 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', 'READY',
      true, 'LIVE', '2025-08-27 14:00:00', '5d726309-0785-47e2-8f81-257d74401543', NOW(), NOW());
 
 -- 강의 구조 데이터
@@ -465,8 +467,8 @@ VALUES
     ('99999999-9999-9999-9999-999999999999', '66666666-6666-6666-6666-666666666666', '22222222-2222-2222-2222-222222222222', '원운동 라이브 수업입니다.', NOW(), NOW());
 
 INSERT INTO lecture_quiz (id, lecture_detail_id, question, created_at, updated_at)
-VALUES 
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777', 
+VALUES
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777',
      '다음 중 속력의 단위가 아닌 것은?', NOW(), NOW()),
     ('bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '77777777-7777-7777-7777-777777777777',
      '뉴턴의 제1법칙(관성의 법칙)에 대한 설명으로 옳은 것은?', NOW(), NOW()),
@@ -485,25 +487,25 @@ VALUES
     ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm/s^2', false),
     ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'kg', true),
     ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'cm/s', false),
-    
+
     -- 2번 문제: 뉴턴의 제1법칙
     ('11111111-1111-1111-1111-111111111111', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '힘이 작용하면 물체는 반드시 운동한다', false),
     ('22222222-2222-2222-2222-222222222222', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '외력이 0이면 물체는 등속직선운동을 한다', true),
     ('33333333-3333-3333-3333-333333333333', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '가속도는 힘에 비례한다', false),
     ('44444444-4444-4444-4444-444444444444', 'bbbbaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '작용과 반작용은 크기가 같다', false),
-    
+
     -- 3번 문제: 가속도의 단위
     ('55555555-5555-5555-5555-555555555555', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm/s', false),
     ('66666666-6666-6666-6666-666666666666', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm/s^2', true),
     ('77777777-7777-7777-7777-777777777777', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'm^2/s', false),
     ('88888888-8888-8888-8888-888888888888', 'ccccaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'N', false),
-    
+
     -- 4번 문제: 벡터량이 아닌 것
     ('99999999-9999-9999-9999-999999999999', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '속도', false),
     ('aaaabbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '변위', false),
     ('bbbbcccc-cccc-cccc-cccc-cccccccccccc', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '속력', true),
     ('ccccdddd-dddd-dddd-dddd-dddddddddddd', 'ddddaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '가속도', false),
-    
+
     -- 5번 문제: 등속도 운동의 가속도
     ('ddddeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'eeeeaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '0', true),
     ('eeeeffff-ffff-ffff-ffff-ffffffffffff', 'eeeeaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '1', false),
@@ -524,37 +526,37 @@ INSERT INTO student_lecture_progress (id, user_id, lecture_detail_id, is_complet
 VALUES ('aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa', '5d726309-0785-47e2-8f81-257d74401543', '55555555-5555-5555-5555-555555555555', true, NOW(), NOW(), NOW());
 
 INSERT INTO student_review_submission (id, user_id, lecture_detail_id, review_url, teacher_feedback, created_at, updated_at)
-VALUES ('bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', '5d726309-0785-47e2-8f81-257d74401543', '55555555-5555-5555-5555-555555555555', 
+VALUES ('bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', '5d726309-0785-47e2-8f81-257d74401543', '55555555-5555-5555-5555-555555555555',
         'https://review-url.com', '복습을 잘 했습니다.', NOW(), NOW());
 
 -- 강의 질문 및 답변 샘플 데이터
 INSERT INTO lecture_question (id, lecture_id, student_id, title, content, is_answered, created_at, updated_at)
-VALUES 
+VALUES
     -- 답변 완료된 질문들
-    ('12345678-1111-1111-1111-123456789abc', '33333333-3333-3333-3333-333333333333', '5d726309-0785-47e2-8f81-257d74401543', 
-     'EJU 수학 문제 질문', 'EJU 수학에서 벡터의 내적과 외적의 차이점이 무엇인가요? 실제 문제에서 어떻게 구분해서 사용하는지 궁금합니다.', 
+    ('12345678-1111-1111-1111-123456789abc', '33333333-3333-3333-3333-333333333333', '5d726309-0785-47e2-8f81-257d74401543',
+     'EJU 수학 문제 질문', 'EJU 수학에서 벡터의 내적과 외적의 차이점이 무엇인가요? 실제 문제에서 어떻게 구분해서 사용하는지 궁금합니다.',
      true, '2025-08-25 10:30:00', NOW()),
-    
+
     ('12345678-2222-2222-2222-123456789abc', '33333333-3333-3333-3333-333333333333', '5d726309-0785-47e2-8f81-257d74401543',
-     '물리 가속도 공식 질문', '등가속도 운동에서 s = v₀t + ½at² 공식을 유도하는 과정을 자세히 설명해주세요.', 
+     '물리 가속도 공식 질문', '등가속도 운동에서 s = v₀t + ½at² 공식을 유도하는 과정을 자세히 설명해주세요.',
      true, '2025-08-26 14:20:00', NOW()),
-    
-    -- 답변 대기중인 질문들  
+
+    -- 답변 대기중인 질문들
     ('12345678-3333-3333-3333-123456789abc', '22222222-1111-1111-1111-111111111111', '5d726309-0785-47e2-8f81-257d74401543',
-     '화학 반응 속도론', '화학 반응에서 온도가 10도 올라갈 때마다 반응 속도가 2배씩 빨라진다고 하는데, 이것의 과학적 원리는 무엇인가요?', 
+     '화학 반응 속도론', '화학 반응에서 온도가 10도 올라갈 때마다 반응 속도가 2배씩 빨라진다고 하는데, 이것의 과학적 원리는 무엇인가요?',
      false, '2025-08-27 09:15:00', NOW()),
-     
+
     ('12345678-4444-4444-4444-123456789abc', '33333333-1111-1111-1111-111111111111', '5d726309-0785-47e2-8f81-257d74401543',
-     'EJU 일본어 문법', 'けれども와 だが의 차이점과 각각 어떤 상황에서 사용하는지 알고 싶습니다.', 
+     'EJU 일본어 문법', 'けれども와 だが의 차이점과 각각 어떤 상황에서 사용하는지 알고 싶습니다.',
      false, '2025-08-27 16:45:00', NOW()),
-     
+
     ('12345678-5555-5555-5555-123456789abc', '33333333-3333-3333-3333-333333333333', '5d726309-0785-47e2-8f81-257d74401543',
-     '종합과목 문제 풀이', '종합과목에서 역사와 지리가 어떤 비율로 출제되는지, 그리고 각 영역별 효율적인 공부 방법을 알려주세요.', 
+     '종합과목 문제 풀이', '종합과목에서 역사와 지리가 어떤 비율로 출제되는지, 그리고 각 영역별 효율적인 공부 방법을 알려주세요.',
      false, '2025-08-28 11:30:00', NOW());
 
 -- 강의 질문 답변 샘플 데이터
 INSERT INTO lecture_question_answer (id, question_id, teacher_id, content, created_at, updated_at)
-VALUES 
+VALUES
     ('aaaaaaaa-1111-1111-1111-aaaaaaaaaaaa', '12345678-1111-1111-1111-123456789abc', '22222222-2222-2222-2222-222222222222',
      '좋은 질문입니다! 벡터의 내적과 외적의 차이를 설명드리겠습니다.
 
@@ -565,13 +567,13 @@ VALUES
 - 활용: 일(Work) 계산, 각도 구하기, 수직 판별
 
 **외적(벡터곱, Cross Product):**
-- 결과: 벡터 값 (크기와 방향 있음)  
+- 결과: 벡터 값 (크기와 방향 있음)
 - 공식: |A⃗ × B⃗| = |A||B|sinθ
 - 의미: 두 벡터에 수직인 새로운 벡터 생성
 - 활용: 토크(Torque) 계산, 평행사변형 넓이
 
 EJU에서는 주로 내적이 출제되니 내적 위주로 연습하세요!', '2025-08-25 15:45:00', NOW()),
-    
+
     ('aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', '12345678-2222-2222-2222-123456789abc', '22222222-2222-2222-2222-222222222222',
      '등가속도 운동 공식 유도 과정을 단계별로 설명해드리겠습니다.
 
@@ -602,27 +604,27 @@ EJU에서는 주로 내적이 출제되니 내적 위주로 연습하세요!', '
 
 -- 추가 선생님 계정 (기존에 22222222-2222-2222-2222-222222222222가 있으므로 다른 ID 사용)
 INSERT INTO users (id, user_id, password, name, role, active, created_at, updated_at)
-VALUES 
+VALUES
     ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'teacher1@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '뿡구리', 'TEACHER', true, NOW(), NOW()),
     ('ffffffff-1111-1111-1111-ffffffffffff', 'teacher2@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '짱구리', 'TEACHER', true, NOW(), NOW());
 
 -- 추가 학생 계정
 INSERT INTO users (id, user_id, password, name, role, student_contact, active, created_at, updated_at)
-VALUES 
+VALUES
     ('aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'student1@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '김학생', 'STUDENT', '010-1111-1111', true, NOW(), NOW()),
     ('bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'student2@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '이학생', 'STUDENT', '010-2222-2222', true, NOW(), NOW()),
     ('cccccccc-2222-2222-2222-cccccccccccc', 'student3@test.com', '$2a$10$IEmWo7N8Atwk.pIlqx.fA.wRbnebj4LJYk4Xs3KYvuFc6M5LjnhEW', '박학생', 'STUDENT', '010-3333-3333', true, NOW(), NOW());
 
 -- 김선생님의 추가 강의
-INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
+INSERT INTO lecture (id, title, subtitle, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
 VALUES
-    ('dddddddd-1111-1111-1111-dddddddddddd', 'EJU 수학 심화', '수학', '수학', '수학 심화 과정', 180000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 120, '수학 고득점 목표', 'image', null, NOW(), NOW()),
-    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'EJU 종합과목', '종합과목', '종합과목', '종합과목 기초', 160000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 100, '종합과목 기초', 'image', null, NOW(), NOW());
+    ('dddddddd-1111-1111-1111-dddddddddddd', 'EJU 수학 심화', '고득점을 위한 심화 과정', '수학', '수학', '수학 심화 과정', 180000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 120, '수학 고득점 목표', 'image', null, NOW(), NOW()),
+    ('eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 'EJU 종합과목', '일본 역사와 지리 완전정복', '종합과목', '종합과목', '종합과목 기초', 160000, 'eeeeeeee-1111-1111-1111-eeeeeeeeeeee', 100, '종합과목 기초', 'image', null, NOW(), NOW());
 
 -- 박선생님의 강의
-INSERT INTO lecture (id, title, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
+INSERT INTO lecture (id, title, subtitle, category, course, description, price, teacher_id, period, target, image, url, created_at, updated_at)
 VALUES
-    ('ffffffff-1111-1111-1111-ffffffffffff', 'EJU 일본어', '일본어', '일본어', '일본어 기초부터 고급까지', 140000, 'ffffffff-1111-1111-1111-ffffffffffff', 80, '일본어 초급자', 'image', null, NOW(), NOW());
+    ('ffffffff-1111-1111-1111-ffffffffffff', 'EJU 일본어', 'N1 수준까지 완성하기', '일본어', '일본어', '일본어 기초부터 고급까지', 140000, 'ffffffff-1111-1111-1111-ffffffffffff', 80, '일본어 초급자', 'image', null, NOW(), NOW());
 
 -- 추가 강의 챕터
 INSERT INTO lecture_chapter (id, lecture_id, title, chapter_order, created_at, updated_at)
@@ -641,22 +643,22 @@ VALUES
 
 -- 피드백 대기 중인 학생 제출물 (teacher_feedback이 null)
 INSERT INTO student_review_submission (id, user_id, lecture_detail_id, review_url, teacher_feedback, created_at, updated_at)
-VALUES 
+VALUES
     -- 김선생님 강의 - EJU 수학 심화
     ('dddddddd-4444-4444-4444-dddddddddddd', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'dddddddd-3333-3333-3333-dddddddddddd', 'https://youtube.com/watch?v=math_diff_1', null, '2025-09-16 14:30:00', NOW()),
     ('eeeeeeee-4444-4444-4444-eeeeeeeeeeee', 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'dddddddd-3333-3333-3333-dddddddddddd', 'https://youtube.com/watch?v=math_diff_2', null, '2025-09-16 15:45:00', NOW()),
     ('ffffffff-4444-4444-4444-ffffffffffff', 'cccccccc-2222-2222-2222-cccccccccccc', 'eeeeeeee-3333-3333-3333-eeeeeeeeeeee', 'https://youtube.com/watch?v=math_integ_1', null, '2025-09-17 09:20:00', NOW()),
-    
+
     -- 김선생님 강의 - EJU 종합과목
     ('aaaaaaaa-4444-4444-4444-aaaaaaaaaaaa', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'ffffffff-3333-3333-3333-ffffffffffff', 'https://youtube.com/watch?v=history_meiji_1', null, '2025-09-17 11:15:00', NOW()),
-    
+
     -- 박선생님 강의 - EJU 일본어
     ('bbbbbbbb-4444-4444-4444-bbbbbbbbbbbb', 'bbbbbbbb-2222-2222-2222-bbbbbbbbbbbb', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'https://youtube.com/watch?v=japanese_grammar_1', null, '2025-09-17 13:40:00', NOW()),
     ('cccccccc-4444-4444-4444-cccccccccccc', 'cccccccc-2222-2222-2222-cccccccccccc', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'https://youtube.com/watch?v=japanese_grammar_2', null, '2025-09-17 16:25:00', NOW());
 
 -- 이미 피드백이 완료된 제출물 (비교용)
 INSERT INTO student_review_submission (id, user_id, lecture_detail_id, review_url, teacher_feedback, created_at, updated_at)
-VALUES 
+VALUES
     ('dddddddd-5555-5555-5555-dddddddddddd', 'aaaaaaaa-2222-2222-2222-aaaaaaaaaaaa', 'eeeeeeee-3333-3333-3333-eeeeeeeeeeee', 'https://youtube.com/watch?v=completed_review', '잘 정리하였습니다. 다음 단계로 진행하세요.', '2025-09-15 10:00:00', NOW());
 
 -- 학생 강의 수강 등록
@@ -711,3 +713,183 @@ VALUES
     -- 조사와 조동사 강의 첨부파일
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'japanese_grammar_guide.pdf', '일본어 조사 조동사 정리.pdf', '/uploads/lecture/japanese_grammar_guide.pdf', 1048576, 'PDF', 'application/pdf', '조사와 조동사 완벽 정리', 25, NOW(), NOW()),
     ('bbbbbbbb-aaaa-aaaa-aaaa-bbbbbbbbbbbb', 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa', 'grammar_exercises.zip', '문법 연습 파일.zip', '/uploads/lecture/grammar_exercises.zip', 4194304, 'ZIP', 'application/zip', '문법 연습 파일 모음', 7, NOW(), NOW());
+
+-- ============================================================================
+-- 강의 이미지 테이블 (다대다 관계)
+-- ============================================================================
+
+-- 강의 이미지 테이블 생성
+CREATE TABLE lecture_image (
+    -- 기본 정보
+    id UUID PRIMARY KEY,
+    lecture_id UUID NOT NULL REFERENCES lecture(id) ON DELETE CASCADE,
+
+    -- 이미지 정보
+    original_file_name VARCHAR(255) NOT NULL,
+    stored_file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size BIGINT NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+
+    -- 이미지 순서 및 설정
+    display_order INTEGER NOT NULL DEFAULT 0,
+    is_primary BOOLEAN DEFAULT false, -- 대표 이미지 여부
+
+    -- 이미지 설명
+    alt_text VARCHAR(255), -- 대체 텍스트
+    description TEXT, -- 이미지 설명
+
+    -- 관리 정보
+    uploaded_by UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now(),
+
+    -- 제약 조건
+    CONSTRAINT chk_file_size CHECK (file_size > 0),
+    CONSTRAINT chk_display_order CHECK (display_order >= 0)
+);
+
+-- 강의 이미지 인덱스 생성
+CREATE INDEX idx_lecture_image_lecture_id ON lecture_image(lecture_id);
+CREATE INDEX idx_lecture_image_order ON lecture_image(lecture_id, display_order);
+CREATE INDEX idx_lecture_image_primary ON lecture_image(lecture_id, is_primary) WHERE is_primary = true;
+CREATE INDEX idx_lecture_image_uploaded_by ON lecture_image(uploaded_by);
+
+-- 파일 경로에 대한 유니크 인덱스 (같은 파일이 중복 저장되지 않도록)
+CREATE UNIQUE INDEX idx_lecture_image_stored_file_name ON lecture_image(stored_file_name);
+
+-- 대표 이미지는 강의당 하나만 가능하도록 하는 유니크 제약조건
+CREATE UNIQUE INDEX idx_lecture_image_one_primary_per_lecture
+ON lecture_image(lecture_id)
+WHERE is_primary = true;
+
+-- ============================================================================
+-- 강의 이미지 샘플 데이터
+-- ============================================================================
+
+-- 강의 이미지 샘플 데이터 삽입
+INSERT INTO lecture_image (id, lecture_id, original_file_name, stored_file_name, file_path, file_size, mime_type, display_order, is_primary, alt_text, description, uploaded_by, created_at, updated_at)
+VALUES
+    -- EJU 종합 강의 이미지들
+    ('aaaa1111-1111-1111-1111-111111111111',
+     '33333333-3333-3333-3333-333333333333',
+     'eju_comprehensive_main.jpg',
+     'lecture_image_20240827_001.jpg',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_001.jpg',
+     2048576,
+     'image/jpeg',
+     1,
+     true, -- 대표 이미지
+     'EJU 종합 강의 메인 이미지',
+     'EJU 종합 강의의 대표 이미지입니다.',
+     '22222222-2222-2222-2222-222222222222',
+     NOW(),
+     NOW()),
+
+    ('aaaa2222-2222-2222-2222-222222222222',
+     '33333333-3333-3333-3333-333333333333',
+     'eju_schedule.png',
+     'lecture_image_20240827_002.png',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_002.png',
+     1024768,
+     'image/png',
+     2,
+     false,
+     'EJU 시험 일정표',
+     'EJU 시험 일정과 준비 과정을 보여주는 이미지입니다.',
+     '22222222-2222-2222-2222-222222222222',
+     NOW(),
+     NOW()),
+
+    ('aaaa3333-3333-3333-3333-333333333333',
+     '33333333-3333-3333-3333-333333333333',
+     'eju_subjects.jpg',
+     'lecture_image_20240827_003.jpg',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_003.jpg',
+     3145728,
+     'image/jpeg',
+     3,
+     false,
+     'EJU 과목별 구성',
+     'EJU 각 과목별 구성과 비중을 설명하는 이미지입니다.',
+     '22222222-2222-2222-2222-222222222222',
+     NOW(),
+     NOW()),
+
+    -- 물리 강의 이미지
+    ('bbbb1111-1111-1111-1111-111111111111',
+     '22222222-1111-1111-1111-111111111111',
+     'physics_main.jpg',
+     'lecture_image_20240827_004.jpg',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_004.jpg',
+     1536000,
+     'image/jpeg',
+     1,
+     true, -- 대표 이미지
+     '물리 강의 메인 이미지',
+     '물리 강의의 대표 이미지입니다.',
+     '11111111-1111-1111-1111-111111111111',
+     NOW(),
+     NOW()),
+
+    ('bbbb2222-2222-2222-2222-222222222222',
+     '22222222-1111-1111-1111-111111111111',
+     'physics_formulas.png',
+     'lecture_image_20240827_005.png',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_005.png',
+     896000,
+     'image/png',
+     2,
+     false,
+     '물리 공식 모음',
+     '물리학 핵심 공식들을 정리한 이미지입니다.',
+     '11111111-1111-1111-1111-111111111111',
+     NOW(),
+     NOW()),
+
+    -- 화학 강의 이미지
+    ('cccc1111-1111-1111-1111-111111111111',
+     '33333333-1111-1111-1111-111111111111',
+     'chemistry_main.jpg',
+     'lecture_image_20240827_006.jpg',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_006.jpg',
+     1792000,
+     'image/jpeg',
+     1,
+     true, -- 대표 이미지
+     '화학 강의 메인 이미지',
+     '화학 강의의 대표 이미지입니다.',
+     '11111111-1111-1111-1111-111111111111',
+     NOW(),
+     NOW()),
+
+    -- EJU 수학 심화 강의 이미지
+    ('dddd1111-1111-1111-1111-111111111111',
+     'dddddddd-1111-1111-1111-dddddddddddd',
+     'math_advanced_main.jpg',
+     'lecture_image_20240827_007.jpg',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_007.jpg',
+     2304000,
+     'image/jpeg',
+     1,
+     true, -- 대표 이미지
+     'EJU 수학 심화 메인 이미지',
+     'EJU 수학 심화 과정의 대표 이미지입니다.',
+     'eeeeeeee-1111-1111-1111-eeeeeeeeeeee',
+     NOW(),
+     NOW()),
+
+    ('dddd2222-2222-2222-2222-222222222222',
+     'dddddddd-1111-1111-1111-dddddddddddd',
+     'calculus_concepts.png',
+     'lecture_image_20240827_008.png',
+     '/uploads/lecture_images/2024/08/lecture_image_20240827_008.png',
+     1280000,
+     'image/png',
+     2,
+     false,
+     '미적분 개념도',
+     '미적분의 핵심 개념들을 시각화한 이미지입니다.',
+     'eeeeeeee-1111-1111-1111-eeeeeeeeeeee',
+     NOW(),
+     NOW());

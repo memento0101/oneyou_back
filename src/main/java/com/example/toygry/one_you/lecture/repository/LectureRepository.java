@@ -66,6 +66,83 @@ public class LectureRepository {
                 .fetchOneInto(LectureDetailRecord.class);
     }
 
+    // 강의 제목 조회
+    public String findLectureTitle(UUID lectureId) {
+        return dsl.select(LECTURE.TITLE)
+                .from(LECTURE)
+                .where(LECTURE.ID.eq(lectureId))
+                .fetchOne(LECTURE.TITLE);
+    }
+
+    // 강의 생성
+    public UUID insertLecture(String title, String subtitle, String category, UUID teacherId,
+                             String description, Integer price, Integer period, String target, String url) {
+        UUID lectureId = UUID.randomUUID();
+
+        dsl.insertInto(LECTURE)
+                .set(LECTURE.ID, lectureId)
+                .set(LECTURE.TITLE, title)
+                .set(LECTURE.SUBTITLE, subtitle)
+                .set(LECTURE.CATEGORY, category)
+                .set(LECTURE.TEACHER_ID, teacherId)
+                .set(LECTURE.DESCRIPTION, description)
+                .set(LECTURE.PRICE, price)
+                .set(LECTURE.PERIOD, period)
+                .set(LECTURE.TARGET, target)
+                .set(LECTURE.URL, url)
+                .execute();
+
+        return lectureId;
+    }
+
+    // 강의 정보와 강사명 조회
+    public LectureWithTeacherInfo findLectureWithTeacher(UUID lectureId) {
+        return dsl.select(
+                        LECTURE.ID,
+                        LECTURE.TITLE,
+                        LECTURE.SUBTITLE,
+                        LECTURE.CATEGORY,
+                        LECTURE.DESCRIPTION,
+                        LECTURE.PRICE,
+                        LECTURE.PERIOD,
+                        LECTURE.TARGET,
+                        LECTURE.URL,
+                        LECTURE.CREATED_AT,
+                        USERS.NAME.as("teacherName")
+                )
+                .from(LECTURE)
+                .join(USERS).on(USERS.ID.eq(LECTURE.TEACHER_ID))
+                .where(LECTURE.ID.eq(lectureId))
+                .fetchOne(record -> new LectureWithTeacherInfo(
+                        record.get(LECTURE.ID),
+                        record.get(LECTURE.TITLE),
+                        record.get(LECTURE.SUBTITLE),
+                        record.get(LECTURE.CATEGORY),
+                        record.get(LECTURE.DESCRIPTION),
+                        record.get(LECTURE.PRICE),
+                        record.get(LECTURE.PERIOD),
+                        record.get(LECTURE.TARGET),
+                        record.get(LECTURE.URL),
+                        record.get("teacherName", String.class),
+                        record.get(LECTURE.CREATED_AT)
+                ));
+    }
+
+    // 강의 정보와 강사명을 담는 record 클래스
+    public record LectureWithTeacherInfo(
+            UUID lectureId,
+            String title,
+            String subtitle,
+            String category,
+            String description,
+            Integer price,
+            Integer period,
+            String target,
+            String url,
+            String teacherName,
+            java.time.LocalDateTime createdAt
+    ) {}
+
     public LectureContentRecord fetchLectureContent(UUID lectureDetailId) {
         return dsl.selectFrom(LECTURE_CONTENT)
                 .where(LECTURE_CONTENT.LECTURE_DETAIL_ID.eq(lectureDetailId))

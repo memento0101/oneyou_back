@@ -84,9 +84,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ApiResponse<TokenResponse> refreshToken(Authentication authentication) {
         UserTokenPrincipal principal = (UserTokenPrincipal) authentication.getPrincipal();
-        
-        // 새로운 토큰 생성 (사용자 정보로 재로그인 없이)
-        LoginRequest loginRequest = new LoginRequest(principal.getUsername(), null);
+
         TokenResponse newToken = jwtTokenService.generateTokenForRefresh(principal);
         
         return ApiResponse.success(newToken);
