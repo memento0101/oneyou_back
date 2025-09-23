@@ -12,6 +12,7 @@ import com.example.toygry.one_you.video.dto.VideoUploadResponse;
 import com.example.toygry.one_you.video.service.VimeoUploadService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -209,6 +210,236 @@ public class LectureService {
         lectureRepository.insertOrUpdateLectureProgress(userId, request.lectureDetailId(), request.isCompleted());
 
         return request.isCompleted() ? "강의가 완료로 표시되었습니다." : "강의 완료가 취소되었습니다.";
+    }
+
+    // =========================== Chapter CRUD 메서드 ===========================
+
+    /**
+     * 새로운 챕터를 생성합니다.
+     */
+    public ChapterResponse createChapter(UUID lectureId, ChapterRequest request) {
+        // 강의가 존재하는지 확인
+        String lectureTitle = lectureRepository.findLectureTitle(lectureId);
+        if (lectureTitle == null) {
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "강의를 찾을 수 없습니다.");
+        }
+
+        // 챕터 생성
+        UUID chapterId = lectureRepository.insertChapter(lectureId, request.title(), request.chapterOrder());
+
+        // 생성된 챕터 정보 조회
+        return lectureRepository.findChapterById(chapterId);
+    }
+
+    /**
+     * 챕터 정보를 수정합니다.
+     */
+    public ChapterResponse updateChapter(UUID chapterId, ChapterRequest request) {
+        // 챕터가 존재하는지 확인
+        ChapterResponse existingChapter = lectureRepository.findChapterById(chapterId);
+        if (existingChapter == null) {
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "챕터를 찾을 수 없습니다.");
+        }
+
+        // 챕터 수정
+        lectureRepository.updateChapter(chapterId, request.title(), request.chapterOrder());
+
+        // 수정된 챕터 정보 조회
+        return lectureRepository.findChapterById(chapterId);
+    }
+
+    /**
+     * 챕터를 삭제합니다.
+     */
+    public void deleteChapter(UUID chapterId) {
+        // 챕터가 존재하는지 확인
+        ChapterResponse existingChapter = lectureRepository.findChapterById(chapterId);
+        if (existingChapter == null) {
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "챕터를 찾을 수 없습니다.");
+        }
+
+        // 챕터 삭제
+        lectureRepository.deleteChapter(chapterId);
+    }
+
+    // =========================== Detail CRUD 메서드 ===========================
+
+    /**
+     * 새로운 강의 상세를 생성합니다.
+     */
+    public DetailResponse createDetail(UUID chapterId, DetailRequest request) {
+        // 챕터가 존재하는지 확인
+        ChapterResponse chapter = lectureRepository.findChapterById(chapterId);
+        if (chapter == null) {
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "챕터를 찾을 수 없습니다.");
+        }
+
+        // 강의 상세 생성
+        UUID detailId = lectureRepository.insertDetail(chapterId, request.title(), request.type(), request.detailOrder());
+
+        // 생성된 강의 상세 정보 조회
+        return lectureRepository.findDetailById(detailId);
+    }
+
+    /**
+     * 강의 상세 정보를 수정합니다.
+     */
+    public DetailResponse updateDetail(UUID detailId, DetailRequest request) {
+        // 강의 상세가 존재하는지 확인
+        DetailResponse existingDetail = lectureRepository.findDetailById(detailId);
+        if (existingDetail == null) {
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "강의 상세를 찾을 수 없습니다.");
+        }
+
+        // 강의 상세 수정
+        lectureRepository.updateDetail(detailId, request.title(), request.type(), request.detailOrder());
+
+        // 수정된 강의 상세 정보 조회
+        return lectureRepository.findDetailById(detailId);
+    }
+
+    /**
+     * 강의 상세를 삭제합니다.
+     */
+    public void deleteDetail(UUID detailId) {
+        // 강의 상세가 존재하는지 확인
+        DetailResponse existingDetail = lectureRepository.findDetailById(detailId);
+        if (existingDetail == null) {
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "강의 상세를 찾을 수 없습니다.");
+        }
+
+        // 강의 상세 삭제
+        lectureRepository.deleteDetail(detailId);
+    }
+
+    // =========================== 순서 변경 메서드 ===========================
+
+    /**
+     * 강의의 챕터와 상세 순서를 일괄 변경합니다.
+     * 트랜잭션으로 처리되어 모든 변경이 성공하거나 모두 실패합니다.
+     *
+     * @param lectureId 강의 ID
+     * @param request 순서 변경 요청 정보
+     * @return 순서 변경 처리 결과
+     */
+    @Transactional
+    public ReorderResponse reorderLectureContents(UUID lectureId, ReorderRequest request) {
+        // 강의 존재 여부 확인
+        String lectureTitle = lectureRepository.findLectureTitle(lectureId);
+        if (lectureTitle == null) {
+            throw new BaseException(OneYouStatusCode.LECTURE_NOT_FOUND, "강의를 찾을 수 없습니다.");
+        }
+
+        // 요청 데이터 유효성 검사
+        validateReorderRequest(request);
+
+        // 챕터와 상세들이 해당 강의에 속하는지 확인
+        boolean isValid = lectureRepository.validateChaptersAndDetails(lectureId, request.chapters());
+        if (!isValid) {
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                "요청에 포함된 챕터나 강의 상세가 해당 강의에 속하지 않습니다.");
+        }
+
+        try {
+            // 1. 챕터 순서 업데이트
+            lectureRepository.updateChapterOrders(request.chapters());
+
+            // 2. 강의 상세 순서 및 소속 챕터 업데이트
+            lectureRepository.updateDetailOrders(request.chapters());
+
+            // 처리 결과 계산
+            int totalChapters = request.chapters().size();
+            int totalDetails = request.chapters().stream()
+                    .mapToInt(chapter -> chapter.details().size())
+                    .sum();
+
+            return new ReorderResponse(
+                totalChapters,
+                totalDetails,
+                "목차 순서가 성공적으로 변경되었습니다."
+            );
+
+        } catch (Exception e) {
+            throw new BaseException(OneYouStatusCode.INTERNAL_SERVER_ERROR,
+                "목차 순서 변경 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 순서 변경 요청의 유효성을 검사합니다.
+     *
+     * @param request 순서 변경 요청
+     */
+    private void validateReorderRequest(ReorderRequest request) {
+        if (request.chapters() == null || request.chapters().isEmpty()) {
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST, "챕터 정보가 필요합니다.");
+        }
+
+        // 챕터 순서 중복 확인
+        Set<Integer> chapterOrders = new HashSet<>();
+        Set<UUID> chapterIds = new HashSet<>();
+
+        for (ReorderRequest.ChapterOrderInfo chapter : request.chapters()) {
+            // 챕터 ID 중복 확인
+            if (chapterIds.contains(chapter.chapterId())) {
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                    "중복된 챕터 ID가 있습니다: " + chapter.chapterId());
+            }
+            chapterIds.add(chapter.chapterId());
+
+            // 챕터 순서 중복 확인
+            if (chapterOrders.contains(chapter.chapterOrder())) {
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                    "중복된 챕터 순서가 있습니다: " + chapter.chapterOrder());
+            }
+            chapterOrders.add(chapter.chapterOrder());
+
+            // 챕터 순서가 양수인지 확인
+            if (chapter.chapterOrder() <= 0) {
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                    "챕터 순서는 1 이상이어야 합니다.");
+            }
+
+            // 강의 상세 유효성 검사
+            validateChapterDetails(chapter);
+        }
+    }
+
+    /**
+     * 챕터 내 강의 상세들의 유효성을 검사합니다.
+     *
+     * @param chapter 챕터 정보
+     */
+    private void validateChapterDetails(ReorderRequest.ChapterOrderInfo chapter) {
+        if (chapter.details() == null) {
+            throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                "챕터의 강의 상세 정보가 필요합니다.");
+        }
+
+        Set<Integer> detailOrders = new HashSet<>();
+        Set<UUID> detailIds = new HashSet<>();
+
+        for (ReorderRequest.DetailOrderInfo detail : chapter.details()) {
+            // 상세 ID 중복 확인
+            if (detailIds.contains(detail.detailId())) {
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                    "중복된 강의 상세 ID가 있습니다: " + detail.detailId());
+            }
+            detailIds.add(detail.detailId());
+
+            // 상세 순서 중복 확인 (챕터 내에서)
+            if (detailOrders.contains(detail.detailOrder())) {
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                    "챕터 내에서 중복된 강의 상세 순서가 있습니다: " + detail.detailOrder());
+            }
+            detailOrders.add(detail.detailOrder());
+
+            // 상세 순서가 양수인지 확인
+            if (detail.detailOrder() <= 0) {
+                throw new BaseException(OneYouStatusCode.BAD_REQUEST,
+                    "강의 상세 순서는 1 이상이어야 합니다.");
+            }
+        }
     }
 
     // =========================== 강의 생성 관련 메서드 ===========================

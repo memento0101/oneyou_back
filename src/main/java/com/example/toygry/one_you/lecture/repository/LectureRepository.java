@@ -143,6 +143,171 @@ public class LectureRepository {
             java.time.LocalDateTime createdAt
     ) {}
 
+    // === Chapter CRUD 메서드들 ===
+
+    // 챕터 생성
+    public UUID insertChapter(UUID lectureId, String title, Integer chapterOrder) {
+        UUID chapterId = UUID.randomUUID();
+
+        dsl.insertInto(LECTURE_CHAPTER)
+                .set(LECTURE_CHAPTER.ID, chapterId)
+                .set(LECTURE_CHAPTER.LECTURE_ID, lectureId)
+                .set(LECTURE_CHAPTER.TITLE, title)
+                .set(LECTURE_CHAPTER.CHAPTER_ORDER, chapterOrder)
+                .execute();
+
+        return chapterId;
+    }
+
+    // 챕터 조회
+    public com.example.toygry.one_you.lecture.dto.ChapterResponse findChapterById(UUID chapterId) {
+        return dsl.select(
+                        LECTURE_CHAPTER.ID,
+                        LECTURE_CHAPTER.LECTURE_ID,
+                        LECTURE_CHAPTER.TITLE,
+                        LECTURE_CHAPTER.CHAPTER_ORDER,
+                        LECTURE_CHAPTER.CREATED_AT
+                )
+                .from(LECTURE_CHAPTER)
+                .where(LECTURE_CHAPTER.ID.eq(chapterId))
+                .fetchOne(record -> new com.example.toygry.one_you.lecture.dto.ChapterResponse(
+                        record.get(LECTURE_CHAPTER.ID),
+                        record.get(LECTURE_CHAPTER.LECTURE_ID),
+                        record.get(LECTURE_CHAPTER.TITLE),
+                        record.get(LECTURE_CHAPTER.CHAPTER_ORDER),
+                        record.get(LECTURE_CHAPTER.CREATED_AT)
+                ));
+    }
+
+    // 챕터 수정
+    public void updateChapter(UUID chapterId, String title, Integer chapterOrder) {
+        dsl.update(LECTURE_CHAPTER)
+                .set(LECTURE_CHAPTER.TITLE, title)
+                .set(LECTURE_CHAPTER.CHAPTER_ORDER, chapterOrder)
+                .where(LECTURE_CHAPTER.ID.eq(chapterId))
+                .execute();
+    }
+
+    // 챕터 삭제
+    public void deleteChapter(UUID chapterId) {
+        dsl.deleteFrom(LECTURE_CHAPTER)
+                .where(LECTURE_CHAPTER.ID.eq(chapterId))
+                .execute();
+    }
+
+    // === Detail CRUD 메서드들 ===
+
+    // 디테일 생성
+    public UUID insertDetail(UUID chapterId, String title, String type, Integer detailOrder) {
+        UUID detailId = UUID.randomUUID();
+
+        dsl.insertInto(LECTURE_DETAIL)
+                .set(LECTURE_DETAIL.ID, detailId)
+                .set(LECTURE_DETAIL.LECTURE_CHAPTER_ID, chapterId)
+                .set(LECTURE_DETAIL.TITLE, title)
+                .set(LECTURE_DETAIL.TYPE, type)
+                .set(LECTURE_DETAIL.DETAIL_ORDER, detailOrder)
+                .execute();
+
+        return detailId;
+    }
+
+    // 디테일 조회
+    public com.example.toygry.one_you.lecture.dto.DetailResponse findDetailById(UUID detailId) {
+        return dsl.select(
+                        LECTURE_DETAIL.ID,
+                        LECTURE_DETAIL.LECTURE_CHAPTER_ID,
+                        LECTURE_DETAIL.TITLE,
+                        LECTURE_DETAIL.TYPE,
+                        LECTURE_DETAIL.DETAIL_ORDER,
+                        LECTURE_DETAIL.CREATED_AT
+                )
+                .from(LECTURE_DETAIL)
+                .where(LECTURE_DETAIL.ID.eq(detailId))
+                .fetchOne(record -> new com.example.toygry.one_you.lecture.dto.DetailResponse(
+                        record.get(LECTURE_DETAIL.ID),
+                        record.get(LECTURE_DETAIL.LECTURE_CHAPTER_ID),
+                        record.get(LECTURE_DETAIL.TITLE),
+                        record.get(LECTURE_DETAIL.TYPE),
+                        record.get(LECTURE_DETAIL.DETAIL_ORDER),
+                        record.get(LECTURE_DETAIL.CREATED_AT)
+                ));
+    }
+
+    // 디테일 수정
+    public void updateDetail(UUID detailId, String title, String type, Integer detailOrder) {
+        dsl.update(LECTURE_DETAIL)
+                .set(LECTURE_DETAIL.TITLE, title)
+                .set(LECTURE_DETAIL.TYPE, type)
+                .set(LECTURE_DETAIL.DETAIL_ORDER, detailOrder)
+                .where(LECTURE_DETAIL.ID.eq(detailId))
+                .execute();
+    }
+
+    // 디테일 삭제
+    public void deleteDetail(UUID detailId) {
+        dsl.deleteFrom(LECTURE_DETAIL)
+                .where(LECTURE_DETAIL.ID.eq(detailId))
+                .execute();
+    }
+
+    // === 순서 변경 관련 메서드들 ===
+
+    // 챕터 순서 일괄 업데이트
+    public void updateChapterOrders(List<com.example.toygry.one_you.lecture.dto.ReorderRequest.ChapterOrderInfo> chapters) {
+        for (com.example.toygry.one_you.lecture.dto.ReorderRequest.ChapterOrderInfo chapter : chapters) {
+            dsl.update(LECTURE_CHAPTER)
+                    .set(LECTURE_CHAPTER.CHAPTER_ORDER, chapter.chapterOrder())
+                    .where(LECTURE_CHAPTER.ID.eq(chapter.chapterId()))
+                    .execute();
+        }
+    }
+
+    // 강의 상세 순서 및 소속 챕터 일괄 업데이트
+    public void updateDetailOrders(List<com.example.toygry.one_you.lecture.dto.ReorderRequest.ChapterOrderInfo> chapters) {
+        for (com.example.toygry.one_you.lecture.dto.ReorderRequest.ChapterOrderInfo chapter : chapters) {
+            for (com.example.toygry.one_you.lecture.dto.ReorderRequest.DetailOrderInfo detail : chapter.details()) {
+                dsl.update(LECTURE_DETAIL)
+                        .set(LECTURE_DETAIL.LECTURE_CHAPTER_ID, chapter.chapterId())
+                        .set(LECTURE_DETAIL.DETAIL_ORDER, detail.detailOrder())
+                        .where(LECTURE_DETAIL.ID.eq(detail.detailId()))
+                        .execute();
+            }
+        }
+    }
+
+    // 특정 강의의 모든 챕터와 상세 정보 존재 여부 확인
+    public boolean validateChaptersAndDetails(UUID lectureId, List<com.example.toygry.one_you.lecture.dto.ReorderRequest.ChapterOrderInfo> chapters) {
+        // 해당 강의의 모든 챕터 ID 조회
+        List<UUID> existingChapterIds = dsl.select(LECTURE_CHAPTER.ID)
+                .from(LECTURE_CHAPTER)
+                .where(LECTURE_CHAPTER.LECTURE_ID.eq(lectureId))
+                .fetchInto(UUID.class);
+
+        // 해당 강의의 모든 상세 ID 조회
+        List<UUID> existingDetailIds = dsl.select(LECTURE_DETAIL.ID)
+                .from(LECTURE_DETAIL)
+                .join(LECTURE_CHAPTER).on(LECTURE_DETAIL.LECTURE_CHAPTER_ID.eq(LECTURE_CHAPTER.ID))
+                .where(LECTURE_CHAPTER.LECTURE_ID.eq(lectureId))
+                .fetchInto(UUID.class);
+
+        // 요청된 챕터들이 모두 해당 강의에 속하는지 확인
+        for (com.example.toygry.one_you.lecture.dto.ReorderRequest.ChapterOrderInfo chapter : chapters) {
+            if (!existingChapterIds.contains(chapter.chapterId())) {
+                return false;
+            }
+
+            // 요청된 상세들이 모두 해당 강의에 속하는지 확인
+            for (com.example.toygry.one_you.lecture.dto.ReorderRequest.DetailOrderInfo detail : chapter.details()) {
+                if (!existingDetailIds.contains(detail.detailId())) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public LectureContentRecord fetchLectureContent(UUID lectureDetailId) {
         return dsl.selectFrom(LECTURE_CONTENT)
                 .where(LECTURE_CONTENT.LECTURE_DETAIL_ID.eq(lectureDetailId))

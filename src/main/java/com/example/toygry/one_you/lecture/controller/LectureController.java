@@ -113,4 +113,80 @@ public class LectureController {
         LectureCreateResponse response = lectureService.createLecture(request, formRequest.images(), createdBy);
         return ApiResponse.success(response);
     }
+
+    // =========================== Chapter CRUD API ===========================
+
+    @Operation(summary = "챕터 생성", description = "강의에 새로운 챕터를 추가합니다.", tags = {"챕터 관리"})
+    @CommonApiResponses
+    @PostMapping("/{lectureId}/chapters")
+    public ApiResponse<ChapterResponse> createChapter(
+            @Parameter(description = "강의 ID", required = true) @PathVariable UUID lectureId,
+            @RequestBody ChapterRequest request
+    ) {
+        return ApiResponse.success(lectureService.createChapter(lectureId, request));
+    }
+
+    @Operation(summary = "챕터 수정", description = "기존 챕터 정보를 수정합니다.", tags = {"챕터 관리"})
+    @CommonApiResponses
+    @PutMapping("/chapters/{chapterId}")
+    public ApiResponse<ChapterResponse> updateChapter(
+            @Parameter(description = "챕터 ID", required = true) @PathVariable UUID chapterId,
+            @RequestBody ChapterRequest request
+    ) {
+        return ApiResponse.success(lectureService.updateChapter(chapterId, request));
+    }
+
+    @Operation(summary = "챕터 삭제", description = "기존 챕터를 삭제합니다.", tags = {"챕터 관리"})
+    @CommonApiResponses
+    @DeleteMapping("/chapters/{chapterId}")
+    public ApiResponse<String> deleteChapter(
+            @Parameter(description = "챕터 ID", required = true) @PathVariable UUID chapterId
+    ) {
+        lectureService.deleteChapter(chapterId);
+        return ApiResponse.success("챕터가 성공적으로 삭제되었습니다.");
+    }
+
+    // =========================== Detail CRUD API ===========================
+
+    @Operation(summary = "강의 상세 생성", description = "챕터에 새로운 강의 상세를 추가합니다.", tags = {"강의 상세 관리"})
+    @CommonApiResponses
+    @PostMapping("/chapters/{chapterId}/details")
+    public ApiResponse<DetailResponse> createDetail(
+            @Parameter(description = "챕터 ID", required = true) @PathVariable UUID chapterId,
+            @RequestBody DetailRequest request
+    ) {
+        return ApiResponse.success(lectureService.createDetail(chapterId, request));
+    }
+
+    @Operation(summary = "강의 상세 수정", description = "기존 강의 상세 정보를 수정합니다.", tags = {"강의 상세 관리"})
+    @CommonApiResponses
+    @PutMapping("/details/{detailId}")
+    public ApiResponse<DetailResponse> updateDetail(
+            @Parameter(description = "강의 상세 ID", required = true) @PathVariable UUID detailId,
+            @RequestBody DetailRequest request
+    ) {
+        return ApiResponse.success(lectureService.updateDetail(detailId, request));
+    }
+
+    @Operation(summary = "강의 상세 삭제", description = "기존 강의 상세를 삭제합니다.", tags = {"강의 상세 관리"})
+    @CommonApiResponses
+    @DeleteMapping("/details/{detailId}")
+    public ApiResponse<String> deleteDetail(
+            @Parameter(description = "강의 상세 ID", required = true) @PathVariable UUID detailId
+    ) {
+        lectureService.deleteDetail(detailId);
+        return ApiResponse.success("강의 상세가 성공적으로 삭제되었습니다.");
+    }
+
+    // =========================== 순서 변경 API ===========================
+
+    @Operation(summary = "목차 순서 변경", description = "드래그 앤 드롭으로 변경된 챕터와 강의 상세의 순서를 일괄 업데이트합니다.", tags = {"목차 관리"})
+    @CommonApiResponses
+    @PutMapping("/{lectureId}/reorder")
+    public ApiResponse<ReorderResponse> reorderLectureContents(
+            @Parameter(description = "강의 ID", required = true) @PathVariable UUID lectureId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "순서 변경 요청") @RequestBody ReorderRequest request
+    ) {
+        return ApiResponse.success(lectureService.reorderLectureContents(lectureId, request));
+    }
 }
